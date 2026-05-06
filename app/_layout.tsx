@@ -17,8 +17,8 @@ function RootLayoutNav() {
       // Não logado, manda pro login
       router.replace('/login');
     } else if (session && !inAuthGroup) {
-      // Logado, manda direto pro Cofre
-      router.replace('/(auth)/vault');
+      // Logado, manda direto pra home autenticada
+      router.replace('/(auth)/home');
     }
   }, [session, isLoading, segments]);
 
