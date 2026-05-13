@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../src/utils/supabase';
-import { AuthService } from '@/src/features/auth/authService';
 import LoginComponent from '@/src/features/auth/components/LoginComponent';
 import RegisterComponent from '@/src/features/auth/components/RegisterComponent';
+import { useState } from 'react';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
 export default function LoginScreen() {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,7 +13,7 @@ export default function LoginScreen() {
 
       {isLogin 
         ? <LoginComponent></LoginComponent>
-        : <RegisterComponent></RegisterComponent>
+        : <RegisterComponent onSuccess={() => setIsLogin(true)} ></RegisterComponent>
       }
 
         <View style={styles.buttonContainer}>

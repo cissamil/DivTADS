@@ -1,40 +1,33 @@
+// app/_layout.tsx
+import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
 
-function RootLayoutNav() {
-  const { session, isLoading } = useAuth();
+// Criamos um componente auxiliar para lidar com o roteamento
+const InitialLayout = () => {
+  const { user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) return;
-
-    // Verifica se o usuário está tentando acessar a pasta protegida (auth)
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (!session && inAuthGroup) {
-      // Não logado, manda pro login
-      router.replace('/login');
-    } else if (session && !inAuthGroup) {
-      // Logado, manda direto pra home autenticada
+    if (user && !inAuthGroup) {
+      // Se tem usuário e ele NÃO está nas rotas protegidas, manda pra lá!
       router.replace('/(auth)/home');
+    } else if (!user && inAuthGroup) {
+      // Se NÃO tem usuário e ele tenta acessar algo protegido, manda pro login.
+      router.replace('/login');
     }
-  }, [session, isLoading, segments]);
+  }, [user, segments]);
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="(auth)" />
-    </Stack>
-  );
-}
+  return <Slot />;
+};
 
-// O provedor precisa envolver o componente que usa os hooks de roteamento
-export default function Layout() {
+export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <InitialLayout />
     </AuthProvider>
   );
 }
