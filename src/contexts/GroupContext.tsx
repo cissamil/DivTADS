@@ -1,13 +1,12 @@
-import {createContext,
-        useContext,
-        useState,
-        useEffect,
-        ReactNode   
-        }                 from 'react';
-import { Alert }          from 'react-native';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { supabase }       from '../utils/supabase';
-import { useAuth }        from './AuthContext';
+import {
+    createContext,
+    ReactNode,
+    useContext,
+    useState
+} from 'react';
+import { Alert } from 'react-native';
+import { supabase } from '../utils/supabase';
+import { useAuth } from './AuthContext';
 
 //grupo
 export interface Group {
@@ -44,7 +43,7 @@ interface GroupProviderProps {
     const [groups, setGroups] = useState<Group[]>([]);
     const[isLoading, setIsLoading] = useState<boolean>(false);
     const[error, setError] = useState<string | null>(null);
-    const { session } = useAuth();
+    const { user } = useAuth();
 
     //1.buscar grupos do supabase
     const fetchGroups = async () => {
@@ -54,7 +53,7 @@ interface GroupProviderProps {
         const { data, error: supabaseError } = await supabase
             .from ('Membros')
             .select ('*,Grupos(*)')
-            .eq('id_usuario', session?.user.id)
+            .eq('id_usuario', user?.id)
 
             if(supabaseError) throw supabaseError;
             
@@ -79,7 +78,7 @@ interface GroupProviderProps {
     const createGroup = async (titulo: string, descricao: string, idCriador: number) => {
         const tempId = Date.now();
         const newGroupProvisorio: Group = {
-            id: tempId,
+            id_grupo: tempId,
             titulo_grupo: titulo,
             descricao_grupo: descricao,
             balanceamento_geral: 0,
@@ -109,8 +108,8 @@ interface GroupProviderProps {
         //substitui o grupo temp pelo fixo do banco
         if (data && data[0]) {
             setGroups((prevGroups) =>
-                prevGroups.map((g) => (g.id === tempId ? data[0] : g))
-        );
+                prevGroups.map((g) => (g.id_grupo === tempId ? data[0] : g))
+            );
         }
         } catch (err: any) {
             setGroups(backupGroups);
@@ -121,7 +120,7 @@ interface GroupProviderProps {
     //3. deletar grupo
     const deleteGroup = async (groupId: number) => {
         const backupGroups = [...groups];
-        setGroups((prevGroups) => prevGroups.filter((g) => g.id !== groupId));
+        setGroups((prevGroups) => prevGroups.filter((g) => g.id_grupo !== groupId));
 
        try {
       const { error: supabaseError } = await supabase
@@ -136,20 +135,15 @@ interface GroupProviderProps {
         Alert.alert('Erro ao deletar', 'Não foi possível remover o grupo.');
         }
     };
-    
-    //useContext
-    export function useGroups(){
-        const context = useContext(GroupContext);
-        if(!context){
-            throw new Error('useGroups deve ser usado dentro de um GroupProvider!!!!!');
 
-        }
-        return context;
+}
+
+//useContext
+export function useGroups(){
+    const context = useContext(GroupContext);
+    if(!context){
+        throw new Error('useGroups deve ser usado dentro de um GroupProvider!!!!!');
+
     }
-
-    
-
-
-
- 
-
+    return context;
+}

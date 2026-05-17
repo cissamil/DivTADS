@@ -1,15 +1,11 @@
-import { useGroups } from './GroupContext';
+import { useGroups, Group } from '@/src/contexts/GroupContext';
 import { AuthService } from '@/src/features/auth/services/authService';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const authService: AuthService = new AuthService()
 
 export default function HomeScreen() {
-  const groups = [
-    { id: 1, name: 'República', members: 4, expenses: 12, balance: '+R$94', status: 'a receber' },
-    { id: 2, name: 'Viagem SP', members: 3, expenses: 6, balance: '+R$49.00', status: 'a receber' },
-    { id: 3, name: 'Churrasco', members: 4, expenses: 3, balance: '-R$18', status: 'a pagar' },
-  ];
+  const { groups, isLoading, error } = useGroups ();
 
   return (
 
@@ -32,22 +28,13 @@ export default function HomeScreen() {
           {/* Grupos Section */}
           <Text style={styles.sectionTitle}>grupos</Text>
           
-          {groups.map((group) => (
-            <View key={group.id} style={styles.groupCard}>
+          {groups.map((group: Group) => (
+            <View key={group.id_grupo} style={styles.groupCard}>
               <View style={styles.groupIcon}>
                 <Text style={styles.groupIconText}>🏠</Text>
               </View>
               <View style={styles.groupInfo}>
-                <Text style={styles.groupName}>{group.name}</Text>
-                <Text style={styles.groupDetails}>
-                  {group.members} membros · {group.expenses} despesas
-                </Text>
-              </View>
-              <View style={styles.groupBalance}>
-                <Text style={[styles.balanceText, group.balance.includes('-') ? styles.negative : styles.positive]}>
-                  {group.balance}
-                </Text>
-                <Text style={styles.statusText}>{group.status}</Text>
+                <Text style={styles.groupName}>{group.titulo_grupo}</Text>
               </View>
             </View>
           ))}
