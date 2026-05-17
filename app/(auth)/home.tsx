@@ -1,11 +1,16 @@
+import { useAuth } from '@/src/contexts/AuthContext';
 import { AuthService } from '@/src/features/auth/services/authService';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const authService: AuthService = new AuthService()
 
 export default function HomeScreen() {
+
+  const {userData, logout} = useAuth();
+
+
   const groups = [
     { id: 1, name: 'República', members: 4, expenses: 12, balance: '+R$94', status: 'a receber' },
     { id: 2, name: 'Viagem SP', members: 3, expenses: 6, balance: '+R$49.00', status: 'a receber' },
@@ -18,8 +23,8 @@ export default function HomeScreen() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>MEUS GRUPOS</Text>
-          <Text style={[styles.headerTitle, styles.signOut]} onPress={() => authService.signOut()}>Sair da sua conta</Text>          
+          <Text style={styles.headerTitle}>{userData?.name ?? "Usuario"} - MEUS GRUPOS</Text>
+          <Text style={[styles.headerTitle, styles.signOut]} onPress={logout}>Sair da sua conta</Text>          
         </View>
 
         <ScrollView style={styles.content}>

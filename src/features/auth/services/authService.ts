@@ -1,10 +1,15 @@
 import { AuthError, User } from "@supabase/supabase-js";
 import { Alert } from "react-native";
 import { supabase } from "../../../utils/supabase";
+import { UserData } from "../models/UserData";
 import { UserLoginEntity } from "../models/UserLoginEntity";
 import { UserRegistrationEntity } from "../models/UserRegistrationEntity";
 
 export class AuthService {
+
+  public async getCurrentSession(){
+    return await supabase.auth.getSession();
+  }
 
   private async signInWithEmail(email: string, password: string): Promise<AuthError | User | null> {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -23,10 +28,20 @@ export class AuthService {
     return data.user;
   }
 
-  private async signUpWithEmail(email: string, password: string): Promise<AuthError | string | null> {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  private async signUpWithEmail(user: UserRegistrationEntity): Promise<AuthError | string | null> {
+    const { data, error } = await supabase.auth.signUp({ 
+      email: user.email, 
+      password: user.password,
+      options: {
+        data: {
+          name: user.name,
+          phoneNumber: user.phoneNumber
+        }
+      }
+    });
 
     if (error) {
+      console.error(error.message);
       return error;
     }
 
@@ -62,10 +77,7 @@ export class AuthService {
 
   public async registerUser(userRegistrationEntity: UserRegistrationEntity): Promise<void> {
 
-    const response = await this.signUpWithEmail(
-      userRegistrationEntity.email,
-      userRegistrationEntity.password,
-    );
+    const response = await this.signUpWithEmail(userRegistrationEntity);
 
     if (response instanceof AuthError) {
       Alert.alert(
@@ -80,26 +92,29 @@ export class AuthService {
       return;
     }
 
-    const userId = response;
-
-    const { error } = await supabase.from("Usuarios").insert({
-      id_usuario: userId,
-      nome: userRegistrationEntity.name,
-      email: userRegistrationEntity.email,
-      telefone: userRegistrationEntity.phoneNumber,
-      created_at: new Date(),
-    });
-
-    if (error) {
-      Alert.alert("Erro ao registrar usuário: ", error.message);
-      return;
-    }
-
     Alert.alert("Sucesso", "Conta criada! Você já pode entrar em sua conta.");
-
   }
 
-  public async signOut() {
-    await supabase.auth.signOut();
+  public async signOut() : Promise<void>{
+    const {error} = await supabase.auth.signOut();
+    
+    if (error) {
+      Alert.alert("Erro ao sair", error.message);
+    }
+  }
+
+  public async getUserProfile(userId: string): Promise<UserData | null>{
+    const {data, error} = await supabase
+    .from("users")
+    .select("name, email, phoneNumber")
+    .eq('userId', userId)
+    .single();
+
+    if(error){
+      console.error("Erro ao buscar perfil do usuário: ", error.message);
+      return null;
+    }
+
+    return data;
   }
 }

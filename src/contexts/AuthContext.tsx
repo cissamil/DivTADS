@@ -4,12 +4,16 @@ import { AuthService } from '../features/auth/services/authService';
 import { UserLoginEntity } from '../features/auth/models/UserLoginEntity';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserRegistrationEntity } from '../features/auth/models/UserRegistrationEntity';
+import { UserData } from '../features/auth/models/UserData';
+import { supabase } from '../utils/supabase';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  userData: UserData | null;
   login: (credentials: UserLoginEntity) => Promise<void>;
   register: (credentials: UserRegistrationEntity) => Promise<boolean>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -17,7 +21,29 @@ const authService = new AuthService(); // Instanciado fora para não recriar
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() =>{
+    const checkActiveSession = async () => {
+      
+
+      const {data: {session}} = await authService.getCurrentSession();
+
+      if(session?.user){
+        setUser(session.user);
+        
+        const profile = await authService.getUserProfile(session.user.id);
+
+        if(profile){
+          setUserData(profile);
+        }
+      }
+
+      setIsLoading(false);
+    }
+    checkActiveSession();
+  }, [])
 
   // Idealmente, você adicionaria um useEffect aqui para checar se já existe uma sessão ativa no Supabase ao abrir o app
 
@@ -27,6 +53,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loggedUser = await authService.authenticateUser(credentials); 
     if (loggedUser) {
       setUser(loggedUser);
+
+      const profile = await authService.getUserProfile(loggedUser.id);
+
+      if(profile){
+        setUserData(profile);
+      }
     }
     setIsLoading(false);
   };
@@ -44,8 +76,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return true; 
   };
 
+
+  const logout = async () =>{
+    setIsLoading(true);
+
+    await authService.signOut();
+
+    setUser(null);
+    setUserData(null);
+    setIsLoading(false);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register }}>
+    <AuthContext.Provider value={{ user, userData, isLoading, login, register, logout,  }}>
       {children}
     </AuthContext.Provider>
   );
