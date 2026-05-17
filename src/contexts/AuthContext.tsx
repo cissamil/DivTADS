@@ -1,36 +1,54 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { Session } from '@supabase/supabase-js';
-import { supabase } from '../utils/supabase';
+// src/contexts/AuthContext.tsx
+import { User } from '@supabase/supabase-js';
+import { AuthService } from '../features/auth/services/authService';
+import { UserLoginEntity } from '../features/auth/models/UserLoginEntity';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { UserRegistrationEntity } from '../features/auth/models/UserRegistrationEntity';
 
-interface AuthContextProps {
-  session: Session | null;
+interface AuthContextType {
+  user: User | null;
   isLoading: boolean;
+  login: (credentials: UserLoginEntity) => Promise<void>;
+  register: (credentials: UserRegistrationEntity) => Promise<boolean>;
 }
 
-const AuthContext = createContext<AuthContextProps>({ session: null, isLoading: true });
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const authService = new AuthService(); // Instanciado fora para não recriar
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
+  // Idealmente, você adicionaria um useEffect aqui para checar se já existe uma sessão ativa no Supabase ao abrir o app
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+  const login = async (credentials: UserLoginEntity) => {
+    setIsLoading(true);
+    // Usando o método público que você criou!
+    const loggedUser = await authService.authenticateUser(credentials); 
+    if (loggedUser) {
+      setUser(loggedUser);
+    }
+    setIsLoading(false);
+  };
 
-    return () => subscription.unsubscribe();
-  }, []);
+  const register = async (userData: UserRegistrationEntity): Promise<boolean> => {
+    setIsLoading(true);
+    
+    // Chama o seu service
+    await authService.registerUser(userData); 
+    
+    setIsLoading(false);
+    // Como o seu AuthService lida com os alertas de erro internamente, 
+    // podemos retornar true para avisar a UI que o fluxo terminou.
+    // (Num cenário ideal, o authService retornaria uma confirmação de sucesso ou erro)
+    return true; 
+  };
 
   return (
-    <AuthContext.Provider value={{ session, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export const useAuth = () => useContext(AuthContext);

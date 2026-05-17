@@ -2,24 +2,29 @@ import LoginComponent from '@/src/features/auth/components/LoginComponent';
 import RegisterComponent from '@/src/features/auth/components/RegisterComponent';
 import { useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <View style={styles.container}>
 
-      <Text style={styles.title}>DivTADS</Text>
+    <SafeAreaView style={{flex: 1}}>
 
-      {isLogin 
-        ? <LoginComponent></LoginComponent>
-        : <RegisterComponent onSuccess={() => setIsLogin(true)} ></RegisterComponent>
-      }
+      <View style={styles.container}>
 
-        <View style={styles.buttonContainer}>
-          <Button title={isLogin ? "Crie sua conta" : "Já possui uma conta?"} onPress={() => setIsLogin(!isLogin)} color="#666" />
-        </View>
-    </View>
+        <Text style={styles.title}>DivTADS</Text>
+
+        {isLogin 
+          ? <LoginComponent></LoginComponent>
+          : <RegisterComponent onSuccess={() => setIsLogin(true)} ></RegisterComponent>
+        }
+
+          <View style={styles.buttonContainer}>
+            <Button title={isLogin ? "Crie sua conta" : "Já possui uma conta?"} onPress={() => setIsLogin(!isLogin)} color="#666" />
+          </View>
+      </View>
+    </SafeAreaView>
   );
 }
 

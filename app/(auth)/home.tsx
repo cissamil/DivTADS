@@ -1,5 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useGroups } from './GroupContext';
+import { AuthService } from '@/src/features/auth/services/authService';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+const authService: AuthService = new AuthService()
 
 export default function HomeScreen() {
   const groups = [
@@ -9,60 +12,64 @@ export default function HomeScreen() {
   ];
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>MEUS GRUPOS</Text>
-      </View>
 
-      <ScrollView style={styles.content}>
-        {/* Saldo Card */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>saldo consolidado</Text>
-          <Text style={styles.balanceValue}>+R$ 127,50</Text>
-          <Text style={styles.balanceSubtitle}>em 3 grupos ativos</Text>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>MEUS GRUPOS</Text>
+          <Text style={[styles.headerTitle, styles.signOut]} onPress={() => authService.signOut()}>Sair da sua conta</Text>          
         </View>
 
-        {/* Grupos Section */}
-        <Text style={styles.sectionTitle}>grupos</Text>
-        
-        {groups.map((group) => (
-          <View key={group.id} style={styles.groupCard}>
-            <View style={styles.groupIcon}>
-              <Text style={styles.groupIconText}>🏠</Text>
-            </View>
-            <View style={styles.groupInfo}>
-              <Text style={styles.groupName}>{group.name}</Text>
-              <Text style={styles.groupDetails}>
-                {group.members} membros · {group.expenses} despesas
-              </Text>
-            </View>
-            <View style={styles.groupBalance}>
-              <Text style={[styles.balanceText, group.balance.includes('-') ? styles.negative : styles.positive]}>
-                {group.balance}
-              </Text>
-              <Text style={styles.statusText}>{group.status}</Text>
-            </View>
+        <ScrollView style={styles.content}>
+          {/* Saldo Card */}
+          <View style={styles.balanceCard}>
+            <Text style={styles.balanceLabel}>saldo consolidado</Text>
+            <Text style={styles.balanceValue}>+R$ 127,50</Text>
+            <Text style={styles.balanceSubtitle}>em 3 grupos ativos</Text>
           </View>
-        ))}
-      </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>📊</Text>
-          <Text style={styles.navLabel}>grupos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>📋</Text>
-          <Text style={styles.navLabel}>extrato</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>perfil</Text>
-        </TouchableOpacity>
+          {/* Grupos Section */}
+          <Text style={styles.sectionTitle}>grupos</Text>
+          
+          {groups.map((group) => (
+            <View key={group.id} style={styles.groupCard}>
+              <View style={styles.groupIcon}>
+                <Text style={styles.groupIconText}>🏠</Text>
+              </View>
+              <View style={styles.groupInfo}>
+                <Text style={styles.groupName}>{group.name}</Text>
+                <Text style={styles.groupDetails}>
+                  {group.members} membros · {group.expenses} despesas
+                </Text>
+              </View>
+              <View style={styles.groupBalance}>
+                <Text style={[styles.balanceText, group.balance.includes('-') ? styles.negative : styles.positive]}>
+                  {group.balance}
+                </Text>
+                <Text style={styles.statusText}>{group.status}</Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navItem}>
+            <Text style={styles.navIcon}>📊</Text>
+            <Text style={styles.navLabel}>grupos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Text style={styles.navIcon}>📋</Text>
+            <Text style={styles.navLabel}>extrato</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
+            <Text style={styles.navIcon}>👤</Text>
+            <Text style={styles.navLabel}>perfil</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -77,12 +84,17 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   headerTitle: {
     fontSize: 12,
     fontWeight: '600',
     color: '#999',
     letterSpacing: 1,
+  },
+  signOut: {
+    color: 'red'
   },
   content: {
     flex: 1,
