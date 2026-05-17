@@ -1,15 +1,22 @@
+import { AuthService } from '@/src/features/auth/services/authService';
 import { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../../../../src/utils/supabase';
-import { AuthService } from '@/src/features/auth/authService';
+import { Button, StyleSheet, TextInput, View } from 'react-native';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 
-export default function RegisterComponent(){
-  const authService: AuthService = new AuthService();
+export default function RegisterComponent({onSuccess}: {onSuccess: () => void}){
+
+  const {register, isLoading} = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleRegister = async () =>{
+    await register({name, email, phoneNumber, password});
+
+    onSuccess();
+  }
   return (
     <View style={styles.container}>
       <TextInput
@@ -41,7 +48,7 @@ export default function RegisterComponent(){
         secureTextEntry
       />
       <View style={styles.buttonContainer}>
-        <Button title="Entrar" onPress={ () => authService.signUpWithEmail(email, password)} disabled={authService.isLoading} />
+        <Button title="Entrar" onPress={handleRegister} disabled={isLoading} />
       </View>
 
     </View>
