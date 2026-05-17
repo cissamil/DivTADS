@@ -3,19 +3,19 @@ import {createContext,
         useState,
         useEffect,
         ReactNode   
-} from 'react';
-
-import { Alert } from 'react-native';
+        }                 from 'react';
+import { Alert }          from 'react-native';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../utils/supabase';
+import { supabase }       from '../utils/supabase';
+import { useAuth }        from './AuthContext';
 
 //grupo
 export interface Group {
     id_grupo?: number;
     criado_em?: string;
     descricao_grupo: string | null;
-    balanceamento_geral: number;
-    id_criador: number;
+    balanceamento_geral?: number;
+    id_criador?: number;
     titulo_grupo: string;
 }
 
@@ -30,6 +30,8 @@ interface GroupContextData {
     editGroup: (groupId: number, novosDados: Partial<Group>) => Promise<void>;
 }
 
+/* --------------------------------------------------------------------------------------------------------------------------------------------------- */
+
 //createContext
 export const GroupContext = createContext<GroupContextData>({} as GroupContextData)
 
@@ -42,24 +44,35 @@ interface GroupProviderProps {
     const [groups, setGroups] = useState<Group[]>([]);
     const[isLoading, setIsLoading] = useState<boolean>(false);
     const[error, setError] = useState<string | null>(null);
+    const { session } = useAuth();
 
     //1.buscar grupos do supabase
     const fetchGroups = async () => {
         setIsLoading(true);
         setError(null);
         try{
-            const { data, error: supabaseError } = await supabase
-            .from('Grupos')
-            .select('*')
-            .order('created_at', {ascending: false});
+        const { data, error: supabaseError } = await supabase
+            .from ('Membros')
+            .select ('*,Grupos(*)')
+            .eq('id_usuario', session?.user.id)
 
-            if (supabaseError) throw supabaseError;
+            if(supabaseError) throw supabaseError;
+            
+            const gruposFormatados = data.map((item) => {
+                return {id_grupo : item.Grupos.id_grupo, titulo_grupo: item.Grupos.titulo_grupo, descricao_grupo: item.Grupos.descricao_grupo, id_criador: item.Grupos.id_criador, balanceamento_geral: item.Grupos.balanceamento_geral }
+            });
 
-            setGroups(data || 'Vish deu erro kkk em buscar os grupo');
+            setGroups(gruposFormatados);
+        } catch(err:any){
+            console.error('Erro ao buscar grupos:', err.message);
+            setError('Nenhum grupo cadastrado. Crie um novo grupo para começar!')
             setGroups([]);
-        } finally{
-            setIsLoading(false);
         }
+        
+    finally{
+
+    setIsLoading(false);
+    }
     };
 
     //2.criar grupo com refresh
@@ -123,14 +136,20 @@ interface GroupProviderProps {
         Alert.alert('Erro ao deletar', 'Não foi possível remover o grupo.');
         }
     };
-
-    //4. editar grupo
+    
     //useContext
+    export function useGroups(){
+        const context = useContext(GroupContext);
+        if(!context){
+            throw new Error('useGroups deve ser usado dentro de um GroupProvider!!!!!');
 
-
+        }
+        return context;
     }
 
+    
 
 
- }
+
+ 
 

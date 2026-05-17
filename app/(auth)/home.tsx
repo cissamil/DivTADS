@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useGroups } from './GroupContext';
 
 export default function HomeScreen() {
   const groups = [
