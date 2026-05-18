@@ -2,7 +2,9 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { AuthService } from '@/src/features/auth/services/authService';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { FlatList } from 'react-native';
+import { GroupEntity } from '@/src/features/home/models/GroupEntity';
+import GroupCardComponent from '@/src/features/home/components/GroupCardComponent';
 
 const authService: AuthService = new AuthService()
 
@@ -11,10 +13,10 @@ export default function HomeScreen() {
   const {userData, logout} = useAuth();
 
 
-  const groups = [
-    { id: 1, name: 'República', members: 4, expenses: 12, balance: '+R$94', status: 'a receber' },
-    { id: 2, name: 'Viagem SP', members: 3, expenses: 6, balance: '+R$49.00', status: 'a receber' },
-    { id: 3, name: 'Churrasco', members: 4, expenses: 3, balance: '-R$18', status: 'a pagar' },
+  const groups : GroupEntity[] = [
+    { id: "1", name: 'República', numberOfMembers: 4, numberOfExpenses: 12, totalBalance: 94 },
+    { id: "2", name: 'Viagem SP', numberOfMembers: 3, numberOfExpenses: 6, totalBalance: 49.00 },
+    { id: "3", name: 'Churrasco', numberOfMembers: 4, numberOfExpenses: 3, totalBalance: -18 },
   ];
 
   return (
@@ -34,30 +36,17 @@ export default function HomeScreen() {
             <Text style={styles.balanceLabel}>saldo consolidado</Text>
             <Text style={styles.balanceValue}>+R$ 127,50</Text>
             <Text style={styles.balanceSubtitle}>em 3 grupos ativos</Text>
-          </View>
+          </View> 
 
           {/* Grupos Section */}
           <Text style={styles.sectionTitle}>grupos</Text>
 
-          {groups.map((group) => (
-            <View key={group.id} style={styles.groupCard}>
-              <View style={styles.groupIcon}>
-                <Text style={styles.groupIconText}>🏠</Text>
-              </View>
-              <View style={styles.groupInfo}>
-                <Text style={styles.groupName}>{group.name}</Text>
-                <Text style={styles.groupDetails}>
-                  {group.members} membros · {group.expenses} despesas
-                </Text>
-              </View>
-              <View style={styles.groupBalance}>
-                <Text style={[styles.balanceText, group.balance.includes('-') ? styles.negative : styles.positive]}>
-                  {group.balance}
-                </Text>
-                <Text style={styles.statusText}>{group.status}</Text>
-              </View>
-            </View>
-          ))}
+          <FlatList
+
+            data={groups}
+            keyExtractor={item => String(item.id)}
+            renderItem={({item}) => <GroupCardComponent {...item} /> }
+          />
         </ScrollView>
       </View>
 
@@ -122,56 +111,5 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 12,
     letterSpacing: 0.5,
-  },
-  groupCard: {
-    flexDirection: 'row',
-    backgroundColor: '#262626',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  groupIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  groupIconText: {
-    fontSize: 24,
-  },
-  groupInfo: {
-    flex: 1,
-  },
-  groupName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  groupDetails: {
-    fontSize: 12,
-    color: '#999',
-  },
-  groupBalance: {
-    alignItems: 'flex-end',
-  },
-  balanceText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  positive: {
-    color: '#10b981',
-  },
-  negative: {
-    color: '#ef4444',
-  },
-  statusText: {
-    fontSize: 11,
-    color: '#666',
   },
 });
