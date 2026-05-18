@@ -5,5 +5,4 @@ export interface GroupEntity{
     numberOfMembers: number;
     numberOfExpenses: number;
     totalBalance: number;
-    
 }

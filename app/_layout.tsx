@@ -23,7 +23,7 @@ const InitialLayout = () => {
     if (user && !inAuthGroup) {
       // Se tem usuário e ele NÃO está nas rotas protegidas, manda pra lá!
 
-      router.replace('/(auth)/home');
+      router.replace('/(auth)/(tabs)/HomeScreen');
     } else if (!user && !onLoginScreen) {
       // Se NÃO tem usuário e ele tenta acessar algo protegido, manda pro login.
       router.replace('/login');

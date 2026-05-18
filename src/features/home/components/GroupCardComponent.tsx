@@ -1,85 +1,43 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { GroupEntity } from '../models/GroupEntity';
+import { groupCardStyles } from './styles/GroupCardComponentStyles';
 
-export default function GroupCardComponent(group: GroupEntity) {
+type GroupCardProps = {
+    group: GroupEntity;
+    onClick: () => void;
+};
+
+export default function GroupCardComponent({group, onClick} : GroupCardProps) {
+
+    const isTotalBalanceNegative = group.totalBalance < 0;
+    const balanceSign = isTotalBalanceNegative ? "- R$" : "R$";
+    const balanceNumber = isTotalBalanceNegative ? group.totalBalance * -1 : group.totalBalance;
+    const balanceStatus = isTotalBalanceNegative ? "a receber" : "a pagar"
+    const balanceStyle = isTotalBalanceNegative ? groupCardStyles.negative : groupCardStyles.positive;
 
     return (
-        <View key={group.id} style={styles.groupCard}>
-            <View style={styles.groupIcon}>
-                <Text style={styles.groupIconText}>🏠</Text>
+        <TouchableOpacity onPress={() => onClick()}>
+            <View style={groupCardStyles.groupCard}>
+                <View style={groupCardStyles.groupIcon}>
+                    <Text style={groupCardStyles.groupIconText}>🏠</Text>
+                </View>
+                <View style={groupCardStyles.groupInfo}>
+                    <Text style={groupCardStyles.groupName}>{group.name}</Text>
+                    <Text style={groupCardStyles.groupDetails}>
+                        {group.numberOfMembers} membros · {group.numberOfExpenses} despesas
+                    </Text>
+                </View>
+                <View style={groupCardStyles.groupBalance}>
+                    <Text style={[groupCardStyles.balanceText, balanceStyle]}>
+                    {balanceSign} {balanceNumber}
+                    </Text>
+                    <Text style={groupCardStyles.statusText}>{balanceStatus}           
+                    </Text>
+                </View>
             </View>
-            <View style={styles.groupInfo}>
-                <Text style={styles.groupName}>{group.name}</Text>
-                <Text style={styles.groupDetails}>
-                    {group.numberOfMembers} membros · {group.numberOfExpenses} despesas
-                </Text>
-            </View>
-            <View style={styles.groupBalance}>
-                <Text style={[styles.balanceText, group.totalBalance >= 0 ? styles.positive : styles.negative]}>
-                    R$ {group.totalBalance}
-                </Text>
-                <Text style={styles.statusText}>{
-                        group.totalBalance >= 0 ? "a receber" : "a pagar"
-                    }           
-                </Text>
-            </View>
-        </View>
+        </TouchableOpacity>
     );
 
 }
 
 
-
-const styles = StyleSheet.create({
-  groupCard: {
-    flexDirection: 'row',
-    backgroundColor: '#262626',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  groupIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  groupIconText: {
-    fontSize: 24,
-  },
-  groupInfo: {
-    flex: 1,
-  },
-  groupName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  groupDetails: {
-    fontSize: 12,
-    color: '#999',
-  },
-  groupBalance: {
-    alignItems: 'flex-end',
-  },
-  balanceText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  positive: {
-    color: '#10b981',
-  },
-  negative: {
-    color: '#ef4444',
-  },
-  statusText: {
-    fontSize: 11,
-    color: '#666',
-  },
-});

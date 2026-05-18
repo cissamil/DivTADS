@@ -5,15 +5,14 @@
     "jsx": "react-jsx",
     "types": ["node"],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "src/features/home/components/styles/homeScreenStyles.tsx"
   ]
 }
