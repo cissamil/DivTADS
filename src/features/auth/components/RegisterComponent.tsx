@@ -1,7 +1,6 @@
-import { AuthService } from '@/src/features/auth/services/authService';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { useState } from 'react';
 import { Button, StyleSheet, TextInput, View } from 'react-native';
-import { useAuth } from '@/src/contexts/AuthContext';
 
 
 export default function RegisterComponent({onSuccess}: {onSuccess: () => void}){

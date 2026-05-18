@@ -1,11 +1,10 @@
 // src/contexts/AuthContext.tsx
 import { User } from '@supabase/supabase-js';
-import { AuthService } from '../features/auth/services/authService';
-import { UserLoginEntity } from '../features/auth/models/UserLoginEntity';
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserRegistrationEntity } from '../features/auth/models/UserRegistrationEntity';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserData } from '../features/auth/models/UserData';
-import { supabase } from '../utils/supabase';
+import { UserLoginEntity } from '../features/auth/models/UserLoginEntity';
+import { UserRegistrationEntity } from '../features/auth/models/UserRegistrationEntity';
+import { AuthService } from '../features/auth/services/authService';
 
 interface AuthContextType {
   user: User | null;

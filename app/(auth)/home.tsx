@@ -1,6 +1,6 @@
 import { useAuth } from '@/src/contexts/AuthContext';
 import { AuthService } from '@/src/features/auth/services/authService';
-import { Button, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
@@ -18,8 +18,9 @@ export default function HomeScreen() {
   ];
 
   return (
+    
+    <SafeAreaView style={{flex: 1}} edges={{top: "off", bottom: "off" }}>
 
-    <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -37,7 +38,7 @@ export default function HomeScreen() {
 
           {/* Grupos Section */}
           <Text style={styles.sectionTitle}>grupos</Text>
-          
+
           {groups.map((group) => (
             <View key={group.id} style={styles.groupCard}>
               <View style={styles.groupIcon}>
@@ -58,24 +59,10 @@ export default function HomeScreen() {
             </View>
           ))}
         </ScrollView>
-
-        {/* Bottom Navigation */}
-        <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItem}>
-            <Text style={styles.navIcon}>📊</Text>
-            <Text style={styles.navLabel}>grupos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Text style={styles.navIcon}>📋</Text>
-            <Text style={styles.navLabel}>extrato</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-            <Text style={styles.navIcon}>👤</Text>
-            <Text style={styles.navLabel}>perfil</Text>
-          </TouchableOpacity>
-        </View>
       </View>
+
     </SafeAreaView>
+
   );
 }
 
@@ -186,30 +173,5 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 11,
     color: '#666',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-    backgroundColor: '#1a1a1a',
-  },
-  navItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderTopWidth: 3,
-    borderTopColor: 'transparent',
-  },
-  navItemActive: {
-    borderTopColor: '#6366f1',
-  },
-  navIcon: {
-    fontSize: 20,
-    marginBottom: 4,
-  },
-  navLabel: {
-    fontSize: 11,
-    color: '#999',
   },
 });
