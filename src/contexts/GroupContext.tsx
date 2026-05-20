@@ -5,28 +5,19 @@ import {
     useState
 } from 'react';
 import { Alert } from 'react-native';
+import { GroupEntity } from '../features/home/models/GroupEntity';
 import { supabase } from '../utils/supabase';
 import { useAuth } from './AuthContext';
 
-//grupo
-export interface Group {
-    id_grupo?: number;
-    criado_em?: string;
-    descricao_grupo: string | null;
-    balanceamento_geral?: number;
-    id_criador?: number;
-    titulo_grupo: string;
-}
-
 //estado e acoes
 interface GroupContextData {
-    groups: Group[];
+    groups: GroupEntity[];
     isLoading: boolean;
     error: string | null;
-    fetchGrorups: () => Promise<void>;
-    createGroup: (titulo: string, descricao: string, idCriador: number) => Promise<void>;
-    deleteGroup: (groupId: number) => Promise <void>;
-    editGroup: (groupId: number, novosDados: Partial<Group>) => Promise<void>;
+    fetchGroups: () => Promise<void>;
+    createGroup: (title: string, description: string, creatorId: string) => Promise<void>;
+    deleteGroup: (groupId: string) => Promise<void>;
+    editGroup: (groupId: string, newData: Partial<GroupEntity>) => Promise<void>;
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -40,7 +31,7 @@ interface GroupProviderProps {
 
 //Provider
  export function GroupProvider({ children }: GroupProviderProps){
-    const [groups, setGroups] = useState<Group[]>([]);
+    const [groups, setGroups] = useState<GroupEntity[]>([]);
     const[isLoading, setIsLoading] = useState<boolean>(false);
     const[error, setError] = useState<string | null>(null);
     const { user } = useAuth();
@@ -56,9 +47,14 @@ interface GroupProviderProps {
             .eq('id_usuario', user?.id)
 
             if(supabaseError) throw supabaseError;
-            
-            const gruposFormatados = data.map((item) => {
-                return {id_grupo : item.Grupos.id_grupo, titulo_grupo: item.Grupos.titulo_grupo, descricao_grupo: item.Grupos.descricao_grupo, id_criador: item.Grupos.id_criador, balanceamento_geral: item.Grupos.balanceamento_geral }
+            const gruposFormatados: GroupEntity[] = data.map((item) => {
+                return {
+                    id: String(item.Grupos.id_grupo),
+                    name: item.Grupos.titulo_grupo,
+                    description: item.Grupos.descricao_grupo,
+                    creatorId: item.Grupos.id_criador ? String(item.Grupos.id_criador) : undefined,
+                    totalBalance: item.Grupos.balanceamento_geral
+                };
             });
 
             setGroups(gruposFormatados);
@@ -75,16 +71,17 @@ interface GroupProviderProps {
     };
 
     //2.criar grupo com refresh
-    const createGroup = async (titulo: string, descricao: string, idCriador: number) => {
-        const tempId = Date.now();
-        const newGroupProvisorio: Group = {
-            id_grupo: tempId,
-            titulo_grupo: titulo,
-            descricao_grupo: descricao,
-            balanceamento_geral: 0,
-            id_criador: idCriador,
-            criado_em: new Date().toISOString(),
-
+    const createGroup = async (title: string, description: string, creatorId: string) => {
+        const tempId = Date.now().toString();
+        const newGroupProvisorio: GroupEntity = {
+            id: tempId,
+            name: title,
+            description: description,
+            totalBalance: 0,
+            creatorId: creatorId,
+            createdAt: new Date().toISOString(),
+            numberOfMembers: 0,
+            numberOfExpenses: 0
         };
         //atualiza
         const backupGroups = [...groups];
@@ -96,19 +93,29 @@ interface GroupProviderProps {
         const { data, error: supabaseError } = await supabase
             .from('grupo')
             .insert([{ 
-            titulo_grupo: titulo, 
-            descricao_grupo: descricao, 
-            id_criador: idCriador,
+            titulo_grupo: title, 
+            descricao_grupo: description, 
+            id_criador: creatorId,
             balanceamento_geral: 0 
             }])
             .select();
 
         if (supabaseError) throw supabaseError;
 
-        //substitui o grupo temp pelo fixo do banco
+        //substitui o grupo temp pelo fixo do banco (mapeando para GroupEntity)
         if (data && data[0]) {
+            const saved = data[0];
+            const mapped: GroupEntity = {
+                id: String(saved.id_grupo ?? saved.id ?? ''),
+                name: saved.titulo_grupo,
+                description: saved.descricao_grupo,
+                creatorId: saved.id_criador ? String(saved.id_criador) : undefined,
+                totalBalance: saved.balanceamento_geral,
+                createdAt: saved.criado_em
+            };
+
             setGroups((prevGroups) =>
-                prevGroups.map((g) => (g.id_grupo === tempId ? data[0] : g))
+                prevGroups.map((g) => (g.id === tempId ? mapped : g))
             );
         }
         } catch (err: any) {
@@ -118,15 +125,15 @@ interface GroupProviderProps {
         };
 
     //3. deletar grupo
-    const deleteGroup = async (groupId: number) => {
+    const deleteGroup = async (groupId: string) => {
         const backupGroups = [...groups];
-        setGroups((prevGroups) => prevGroups.filter((g) => g.id_grupo !== groupId));
+        setGroups((prevGroups) => prevGroups.filter((g) => g.id !== groupId));
 
        try {
       const { error: supabaseError } = await supabase
         .from('grupo')
         .delete()
-        .eq('id', groupId);
+        .eq('id_grupo', parseInt(groupId));
 
         if (supabaseError) throw supabaseError;
         } catch (err: any) {
