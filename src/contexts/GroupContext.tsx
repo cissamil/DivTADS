@@ -42,18 +42,23 @@ interface GroupProviderProps {
         setError(null);
         try{
         const { data, error: supabaseError } = await supabase
-            .from ('Membros')
-            .select ('*,Grupos(*)')
-            .eq('id_usuario', user?.id)
+            .from('members')
+            .select('group_id, groups:groups(id, title, description, total_balance, creator_id, created_at)')
+            .eq('user_id', user?.id)
 
             if(supabaseError) throw supabaseError;
             const gruposFormatados: GroupEntity[] = data.map((item) => {
+                const group = Array.isArray(item.groups) ? item.groups[0] : item.groups;
+
                 return {
-                    id: String(item.Grupos.id_grupo),
-                    name: item.Grupos.titulo_grupo,
-                    description: item.Grupos.descricao_grupo,
-                    creatorId: item.Grupos.id_criador ? String(item.Grupos.id_criador) : undefined,
-                    totalBalance: item.Grupos.balanceamento_geral
+                    id: String(group?.id ?? item.group_id),
+                    name: group?.title ?? '',
+                    description: group?.description ?? null,
+                    creatorId: group?.creator_id ? String(group.creator_id) : undefined,
+                    createdAt: group?.created_at,
+                    totalBalance: Number(group?.total_balance ?? 0),
+                    numberOfMembers: 0,
+                    numberOfExpenses: 0
                 };
             });
 
@@ -91,27 +96,29 @@ interface GroupProviderProps {
        
         try {
         const { data, error: supabaseError } = await supabase
-            .from('grupo')
+            .from('groups')
             .insert([{ 
-            titulo_grupo: title, 
-            descricao_grupo: description, 
-            id_criador: creatorId,
-            balanceamento_geral: 0 
+            title,
+            description,
+            creator_id: creatorId,
+            total_balance: 0
             }])
             .select();
 
         if (supabaseError) throw supabaseError;
 
-        //substitui o grupo temp pelo fixo do banco (mapeando para GroupEntity)
+       
         if (data && data[0]) {
             const saved = data[0];
             const mapped: GroupEntity = {
-                id: String(saved.id_grupo ?? saved.id ?? ''),
-                name: saved.titulo_grupo,
-                description: saved.descricao_grupo,
-                creatorId: saved.id_criador ? String(saved.id_criador) : undefined,
-                totalBalance: saved.balanceamento_geral,
-                createdAt: saved.criado_em
+                id: String(saved.id ?? ''),
+                name: saved.title,
+                description: saved.description,
+                creatorId: saved.creator_id ? String(saved.creator_id) : undefined,
+                totalBalance: Number(saved.total_balance ?? 0),
+                createdAt: saved.created_at,
+                numberOfMembers: 0,
+                numberOfExpenses: 0
             };
 
             setGroups((prevGroups) =>
@@ -131,9 +138,9 @@ interface GroupProviderProps {
 
        try {
       const { error: supabaseError } = await supabase
-        .from('grupo')
+        .from('groups')
         .delete()
-        .eq('id_grupo', parseInt(groupId));
+        .eq('id', groupId);
 
         if (supabaseError) throw supabaseError;
         } catch (err: any) {
@@ -142,6 +149,49 @@ interface GroupProviderProps {
         Alert.alert('Erro ao deletar', 'Não foi possível remover o grupo.');
         }
     };
+
+    const editGroup = async (groupId: string, newData: Partial<GroupEntity>) => {
+        const backupGroups = [...groups];
+        setGroups((prevGroups) =>
+            prevGroups.map((group) =>
+                group.id === groupId ? { ...group, ...newData } : group
+            )
+        );
+
+        try {
+            const payload: Record<string, unknown> = {};
+
+            if (newData.name !== undefined) payload.title = newData.name;
+            if (newData.description !== undefined) payload.description = newData.description;
+            if (newData.totalBalance !== undefined) payload.total_balance = newData.totalBalance;
+
+            const { error: supabaseError } = await supabase
+                .from('groups')
+                .update(payload)
+                .eq('id', groupId);
+
+            if (supabaseError) throw supabaseError;
+        } catch (err: any) {
+            setGroups(backupGroups);
+            Alert.alert('Erro ao editar', 'Não foi possível atualizar o grupo.');
+        }
+    };
+
+    const contextValue: GroupContextData = {
+        groups,
+        isLoading,
+        error,
+        fetchGroups,
+        createGroup,
+        deleteGroup,
+        editGroup,
+    };
+
+    return (
+        <GroupContext.Provider value={contextValue}>
+            {children}
+        </GroupContext.Provider>
+    );
 
 }
 
