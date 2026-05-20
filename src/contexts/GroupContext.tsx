@@ -150,6 +150,7 @@ interface GroupProviderProps {
         }
     };
 
+    //4.editar grupo
     const editGroup = async (groupId: string, newData: Partial<GroupEntity>) => {
         const backupGroups = [...groups];
         setGroups((prevGroups) =>
