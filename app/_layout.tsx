@@ -17,13 +17,13 @@ const InitialLayout = () => {
 
     if(isLoading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const onLoginScreen = segments[0] === 'login';
+    const current = segments[0];
+    const inAuthGroup = current === 'HomeScreen' || current === 'ExtractScreen' || current === 'ProfileScreen' || current === 'group';
+    const onLoginScreen = current === 'login';
 
     if (user && !inAuthGroup) {
-      // Se tem usuário e ele NÃO está nas rotas protegidas, manda pra lá!
-
-      router.replace('/(auth)/(tabs)/HomeScreen');
+      // Se tem usuário e ele NÃO está nas rotas protegidas, manda pra HomeScreen
+      router.replace('/HomeScreen');
     } else if (!user && !onLoginScreen) {
       // Se NÃO tem usuário e ele tenta acessar algo protegido, manda pro login.
       router.replace('/login');
