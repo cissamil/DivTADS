@@ -1,9 +1,9 @@
 export interface ExpenseEntity{
     id: string;
     groupId: number;
-    memberName?: string;
-    totalAmount: number,
+    memberId?: number | null;
+    totalAmount: number;
     description?: string | null;
-    category?: string,
-    createdAt?: Date
+    category?: string | null;
+    createdAt?: string;
 }

@@ -9,13 +9,16 @@ import { GroupEntity } from '../features/home/models/GroupEntity';
 import { supabase } from '../utils/supabase';
 import { useAuth } from './AuthContext';
 
-//estado e acoes
 interface GroupContextData {
     groups: GroupEntity[];
     isLoading: boolean;
     error: string | null;
     fetchGroups: () => Promise<void>;
-    createGroup: (title: string, description: string, creatorId: string) => Promise<void>;
+    createGroup: (
+        title: string, 
+        description: string, 
+        creatorId: string
+    ) => Promise<void>;
     deleteGroup: (groupId: string) => Promise<void>;
     editGroup: (groupId: string, newData: Partial<GroupEntity>) => Promise<void>;
 }
@@ -69,11 +72,10 @@ interface GroupProviderProps {
             setGroups([]);
         }
         
-    finally{
-
-    setIsLoading(false);
-    }
-    };
+        finally{
+            setIsLoading(false);
+            }
+        };
 
     //2.criar grupo com refresh
     const createGroup = async (title: string, description: string, creatorId: string) => {
