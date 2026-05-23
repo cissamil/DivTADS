@@ -19,23 +19,23 @@ export default function Home() {
   const {userData, logout} = useAuth();
   const [groups, setGroups] = useState<GroupEntity[]>([]);
 
-  // useEffect(()=>{
-  //   if(!userData?.userId) return;
+  useEffect(()=>{
+    if(!userData?.userId) return;
 
-  //   const fetchedGroups = async () =>{
+    const fetchedGroups = async () =>{
 
-  //     console.log("Pegando grupos do usuário");
-  //     const response = await groupService.getGroupsById(userData.userId);
+      console.log("Pegando grupos do usuário");
+      const response = await groupService.getGroupsById(userData.userId);
 
-  //     console.log("Grupos: ", response);
+      console.log("Grupos: ", response);
 
-  //     if(response){
-  //       setGroups(response);
-  //     }
-  //   }
+      if(response){
+        setGroups(response);
+      }
+    }
 
-  //   fetchedGroups();
-  // },[]);
+    fetchedGroups();
+  },[]);
 
   const openGroupDetails = (groupId: string, groupName: string) => {
     console.log("Redirecting...");
@@ -43,7 +43,7 @@ export default function Home() {
       pathname: '/group/[id]',
       params: {
         id: groupId,
-        name: groupName
+        groupName: groupName
       }
     });
   }

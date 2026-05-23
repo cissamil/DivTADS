@@ -19,13 +19,14 @@ export default function AuthAreaLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
                 name="group/[id]"
-                options={{
+                options= {({route}) => ({
+
                     headerShown: true,
-                    title: 'Detalhes do Grupo',
+                    title: (route.params as { groupName?: string })?.groupName,
                     headerStyle: { backgroundColor: '#262626' },
                     headerTintColor: '#fff',
                     headerShadowVisible: false
-                }}
+                })} 
 
             />
 
