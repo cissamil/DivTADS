@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ExtratoScreen() {
+export default function GroupIdScreen() {
+  console.log("Redirected...");
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Tela de Informações do Grupo em construção...</Text>

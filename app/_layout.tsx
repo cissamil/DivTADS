@@ -14,18 +14,15 @@ const InitialLayout = () => {
   useEffect(() => {
 
     if(!navigationState?.key) return;
-
     if(isLoading) return;
 
     const current = segments[0];
-    const inAuthGroup = current === 'HomeScreen' || current === 'ExtractScreen' || current === 'ProfileScreen' || current === 'group';
+    const inAuthGroup = segments[0] === '(auth)';
     const onLoginScreen = current === 'login';
 
     if (user && !inAuthGroup) {
-      // Se tem usuário e ele NÃO está nas rotas protegidas, manda pra HomeScreen
-      router.replace('/HomeScreen');
+      router.replace('/(auth)/(tabs)/home');
     } else if (!user && !onLoginScreen) {
-      // Se NÃO tem usuário e ele tenta acessar algo protegido, manda pro login.
       router.replace('/login');
     }
   }, [user, segments, isLoading, navigationState?.key]);

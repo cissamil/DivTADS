@@ -1,6 +1,12 @@
-import { Stack } from "expo-router";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { Stack, useRootNavigationState, useRouter, useSegments } from "expo-router";
 
 export default function AuthAreaLayout() {
+
+    const { user, isLoading } = useAuth();
+    const segments = useSegments();
+    const router = useRouter();
+    const navigationState =  useRootNavigationState();
 
     return (
         <Stack

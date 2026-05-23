@@ -4,17 +4,19 @@ import GroupCardComponent from '@/src/features/home/components/GroupCardComponen
 import { GroupEntity } from '@/src/features/home/models/GroupEntity';
 import { useRouter } from 'expo-router';
 import { FlatList, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { homeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
 
 const authService: AuthService = new AuthService()
 
-export default function HomeScreen() {
+export default function Home() {
 
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const {userData, logout} = useAuth();
 
   const openGroupDetails = (groupId: string, groupName: string) => {
+    console.log("Redirecting...");
     router.push({
       pathname: '/group/[id]',
       params: {
@@ -37,7 +39,7 @@ export default function HomeScreen() {
 
       <View style={homeScreenStyles.container}>
         {/* Header */}
-        <View style={homeScreenStyles.header}>
+        <View style={[homeScreenStyles.header, {paddingTop: insets.top}]}>
           <Text style={homeScreenStyles.headerTitle}>{userData?.name ?? "Usuario"} - MEUS GRUPOS</Text>
           <Text style={[homeScreenStyles.headerTitle, homeScreenStyles.signOut]} onPress={logout}>Sair da sua conta</Text>          
         </View>

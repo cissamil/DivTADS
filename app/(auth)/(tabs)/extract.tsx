@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ExtratoScreen() {
+export default function Extract() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Tela de Extrato em construção...</Text>
