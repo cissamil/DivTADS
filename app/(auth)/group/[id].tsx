@@ -1,6 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function GroupIdScreen() {
+
+
+  
   console.log("Redirected...");
   return (
     <View style={styles.container}>

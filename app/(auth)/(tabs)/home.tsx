@@ -6,14 +6,36 @@ import { useRouter } from 'expo-router';
 import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { homeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
+import { useEffect, useState } from 'react';
+import { GroupService } from '@/src/features/home/services/groupService';
 
 const authService: AuthService = new AuthService()
+const groupService: GroupService = new GroupService();
 
 export default function Home() {
 
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const {userData, logout} = useAuth();
+  const [groups, setGroups] = useState<GroupEntity[]>([]);
+
+  // useEffect(()=>{
+  //   if(!userData?.userId) return;
+
+  //   const fetchedGroups = async () =>{
+
+  //     console.log("Pegando grupos do usuário");
+  //     const response = await groupService.getGroupsById(userData.userId);
+
+  //     console.log("Grupos: ", response);
+
+  //     if(response){
+  //       setGroups(response);
+  //     }
+  //   }
+
+  //   fetchedGroups();
+  // },[]);
 
   const openGroupDetails = (groupId: string, groupName: string) => {
     console.log("Redirecting...");
@@ -27,11 +49,7 @@ export default function Home() {
   }
 
 
-  const groups : GroupEntity[] = [
-    { id: "1", name: 'República', numberOfMembers: 4, numberOfExpenses: 12, totalBalance: 94 },
-    { id: "2", name: 'Viagem SP', numberOfMembers: 3, numberOfExpenses: 6, totalBalance: 49.00 },
-    { id: "3", name: 'Churrasco', numberOfMembers: 4, numberOfExpenses: 3, totalBalance: -18 },
-  ];
+  // const groups : GroupEntity[] = [];
 
   return (
     
@@ -59,10 +77,18 @@ export default function Home() {
               <Text style={homeScreenStyles.sectionTitle}>grupos</Text>
             </>
           }
+          ListEmptyComponent={
+            <View style={{ padding: 20, alignItems: 'center', marginTop: 40 }}>
+              <Text style={{ color: '#fff', fontSize: 16, marginBottom: 15 }}>
+                Você ainda não participa de nenhum grupo.
+              </Text>
+              {/* Espaço perfeito para colocar o botão amigável exigido no escopo */}
+            </View>
+          }
           renderItem={({ item }) => (
             <GroupCardComponent
               group={item}
-              onClick={() => openGroupDetails(item.id, item.name)}
+              onClick={() => openGroupDetails(item.id, item.title)}
             />
           )}
         />
