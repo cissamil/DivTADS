@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const groupCardStyles = StyleSheet.create({
+export const GroupCardStyles = StyleSheet.create({
   groupCard: {
     flexDirection: 'row',
     backgroundColor: '#262626',

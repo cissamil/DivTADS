@@ -5,7 +5,7 @@ import {
     useState
 } from 'react';
 import { Alert } from 'react-native';
-import { ExpenseEntity } from '../features/home/models/ExpenseEntity';
+import { ExpenseEntity } from '../features/groups/models/ExpenseEntity';
 import { supabase } from '../utils/supabase';
 
 interface ExpenseContextData{

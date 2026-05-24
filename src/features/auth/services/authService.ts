@@ -106,7 +106,7 @@ export class AuthService {
   public async getUserProfile(userId: string): Promise<UserData | null>{
     const {data, error} = await supabase
     .from("users")
-    .select("name, email, phoneNumber")
+    .select("userId, name, email, phoneNumber")
     .eq('userId', userId)
     .single();
 

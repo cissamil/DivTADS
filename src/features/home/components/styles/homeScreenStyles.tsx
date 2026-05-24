@@ -1,12 +1,11 @@
 import { StyleSheet } from "react-native";
 
-export const homeScreenStyles = StyleSheet.create({
+export const HomeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1a1a1a',
   },
   header: {
-    paddingTop: 16,
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,

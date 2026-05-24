@@ -1,7 +1,7 @@
 export interface ExpenseEntity{
-    id: string;
-    groupId: number;
-    memberId?: number | null;
+    expenseId: string;
+    groupId: string;
+    memberId: string;
     totalAmount: number;
     description?: string | null;
     category?: string | null;
