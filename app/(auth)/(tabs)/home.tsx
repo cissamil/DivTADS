@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { homeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
+import { HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
 
 
 const numberFormatter: NumberFormatter = new NumberFormatter();
@@ -57,26 +57,26 @@ export default function Home() {
     
     <SafeAreaView style={{flex: 1}} edges={{top: "off", bottom: "off" }}>
 
-      <View style={homeScreenStyles.container}>
+      <View style={HomeScreenStyles.container}>
         {/* Header */}
-        <View style={[homeScreenStyles.header, {paddingTop: insets.top}]}>
-          <Text style={homeScreenStyles.headerTitle}>{userData?.name ?? "Usuario"} - MEUS GRUPOS</Text>
-          <Text style={[homeScreenStyles.headerTitle, homeScreenStyles.signOut]} onPress={logout}>Sair da sua conta</Text>          
+        <View style={[HomeScreenStyles.header, {paddingTop: insets.top}]}>
+          <Text style={HomeScreenStyles.headerTitle}>{userData?.name ?? "Usuario"} - MEUS GRUPOS</Text>
+          <Text style={[HomeScreenStyles.headerTitle, HomeScreenStyles.signOut]} onPress={logout}>Sair da sua conta</Text>          
         </View>
 
         <FlatList
-          style={homeScreenStyles.content}
+          style={HomeScreenStyles.content}
           data={groups}
           keyExtractor={item => String(item.id)}
           ListHeaderComponent={
             <>
-              <View style={homeScreenStyles.balanceCard}>
-                <Text style={homeScreenStyles.balanceLabel}>saldo consolidado</Text>
-                <Text style={homeScreenStyles.balanceValue}>{numberFormatter.formatToMoney(generalBalance)}</Text>
-                <Text style={homeScreenStyles.balanceSubtitle}>em {groups.length} grupos ativos</Text>
+              <View style={HomeScreenStyles.balanceCard}>
+                <Text style={HomeScreenStyles.balanceLabel}>saldo consolidado</Text>
+                <Text style={HomeScreenStyles.balanceValue}>{numberFormatter.formatToMoney(generalBalance)}</Text>
+                <Text style={HomeScreenStyles.balanceSubtitle}>em {groups.length} grupos ativos</Text>
               </View>
 
-              <Text style={homeScreenStyles.sectionTitle}>grupos</Text>
+              <Text style={HomeScreenStyles.sectionTitle}>grupos</Text>
             </>
           }
           ListEmptyComponent={

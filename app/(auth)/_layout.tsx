@@ -21,7 +21,7 @@ export default function AuthAreaLayout() {
                 name="group/[id]"
                 options= {({route}) => ({
 
-                    headerShown: true,
+                    headerShown: false,
                     title: (route.params as { groupName?: string })?.groupName,
                     headerStyle: { backgroundColor: '#262626' },
                     headerTintColor: '#fff',
