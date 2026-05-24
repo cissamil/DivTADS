@@ -1,15 +1,16 @@
 import { useAuth } from '@/src/contexts/AuthContext';
-import { AuthService } from '@/src/features/auth/services/authService';
 import GroupCardComponent from '@/src/features/home/components/GroupCardComponent';
 import { GroupEntity } from '@/src/features/home/models/GroupEntity';
+import { GroupService } from '@/src/features/home/services/groupService';
+import { NumberFormatter } from '@/src/utils/formatMoney';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { homeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
-import { useEffect, useState } from 'react';
-import { GroupService } from '@/src/features/home/services/groupService';
 
-const authService: AuthService = new AuthService()
+
+const numberFormatter: NumberFormatter = new NumberFormatter();
 const groupService: GroupService = new GroupService();
 
 export default function Home() {
@@ -18,14 +19,15 @@ export default function Home() {
   const router = useRouter();
   const {userData, logout} = useAuth();
   const [groups, setGroups] = useState<GroupEntity[]>([]);
-
+  const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0 )
+  
   useEffect(()=>{
     if(!userData?.userId) return;
 
     const fetchedGroups = async () =>{
 
       console.log("Pegando grupos do usuário");
-      const response = await groupService.getGroupsById(userData.userId);
+      const response = await groupService.getGroupsGeneralInformationsByUserId(userData.userId);
 
       console.log("Grupos: ", response);
 
@@ -70,8 +72,8 @@ export default function Home() {
             <>
               <View style={homeScreenStyles.balanceCard}>
                 <Text style={homeScreenStyles.balanceLabel}>saldo consolidado</Text>
-                <Text style={homeScreenStyles.balanceValue}>+R$ 127,50</Text>
-                <Text style={homeScreenStyles.balanceSubtitle}>em 3 grupos ativos</Text>
+                <Text style={homeScreenStyles.balanceValue}>{numberFormatter.formatToMoney(generalBalance)}</Text>
+                <Text style={homeScreenStyles.balanceSubtitle}>em {groups.length} grupos ativos</Text>
               </View>
 
               <Text style={homeScreenStyles.sectionTitle}>grupos</Text>
