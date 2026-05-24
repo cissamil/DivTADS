@@ -3,8 +3,8 @@ import GroupCardComponent from '@/src/features/home/components/GroupCardComponen
 import { GroupEntity } from '@/src/features/home/models/GroupEntity';
 import { GroupService } from '@/src/features/home/services/groupService';
 import { NumberFormatter } from '@/src/utils/formatMoney';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
@@ -21,23 +21,23 @@ export default function Home() {
   const [groups, setGroups] = useState<GroupEntity[]>([]);
   const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0 )
   
-  useEffect(()=>{
-    if(!userData?.userId) return;
+  useFocusEffect(
+    useCallback(() =>{
 
-    const fetchedGroups = async () =>{
+      if(!userData?.userId) return;
 
-      console.log("Pegando grupos do usuário");
-      const response = await groupService.getGroupsGeneralInformationsByUserId(userData.userId);
+      const fetchedGroups = async () => {
+        console.log("Buscando grupos atualizados (Tela em Foco)...");
+        const response = await groupService.getGroupsGeneralInformationsByUserId(userData.userId);
 
-      console.log("Grupos: ", response);
+        if (response) {
+          setGroups(response);
+        }
+      };
 
-      if(response){
-        setGroups(response);
-      }
-    }
-
-    fetchedGroups();
-  },[]);
+      fetchedGroups();
+    }, [userData?.userId])
+  )
 
   const openGroupDetails = (groupId: string, groupName: string) => {
     console.log("Redirecting...");

@@ -56,7 +56,7 @@ export default function GroupDetailsScreen() {
       </View>
 
       {activeTab === 'expenses' && <AddExpensesComponentButton />}
-      {activeTab === 'members' && <InviteUserButtonComponent />}
+      {activeTab === 'members' && <InviteUserButtonComponent groupId={groupId} groupName={groupName as string}/>}
     </View>
   );
 }
