@@ -12,7 +12,7 @@ interface ExpenseContextData{
     expenses: ExpenseEntity[];
     isLoading: boolean;
     error: string | null;
-    fetchExpenses: (groupId: number) => Promise<void>;
+    fetchExpenses: (groupId: string | number) => Promise<void>;
     createExpense: (
         groupId: string | number,
         totalAmount: number,
@@ -20,7 +20,7 @@ interface ExpenseContextData{
         memberId?: string | number | null,
         category?: string
     ) => Promise<void>;
-    deleteExpense: (expenseId: string) => Promise<void>;
+    deleteExpense: (expenseId: string | number) => Promise<void>;
 }
 
 //createContext
@@ -40,23 +40,23 @@ interface ExpenseProviderProps {
     const [error, setError] = useState<string | null>(null);
 
     // 1. buscar despesas do Supabase
-    const fetchExpenses = async (groupId: number) => {
+    const fetchExpenses = async (groupId: string | number) => {
     setIsLoading(true);
     setError(null);
     try {
         const { data, error: supabaseError } = await supabase
             .from('expenses')
             .select('*')
-            .eq('group_id', groupId)
+            .eq('group_id', Number(groupId))
             .order('created_at', { ascending: false });
 
         if (supabaseError) throw supabaseError;
 
         
         const expensesFormatados: ExpenseEntity[] = (data ?? []).map((row: any) => ({
-            id: String(row.id),
-            groupId: Number(row.group_id),
-            memberId: row.member_id ? Number(row.member_id) : null,
+            expenseId: String(row.id),
+            groupId: String(row.group_id),
+            memberId: row.member_id ? String(row.member_id) : null,
             totalAmount: Number(row.total_amount ?? 0),
             description: row.description ?? null,
             category: row.category ?? null,
@@ -85,9 +85,9 @@ interface ExpenseProviderProps {
     ) => {
 
         const temporaryExpense: ExpenseEntity = {
-            id: Date.now().toString(),
-            groupId: Number(groupId),
-            memberId: memberId ? Number(memberId) : null,
+            expenseId: String(Date.now()),
+            groupId: String(groupId),
+            memberId: memberId ? String(memberId) : null,
             totalAmount,
             description: description ?? null,
             category: category ?? null,
@@ -119,13 +119,13 @@ interface ExpenseProviderProps {
     const deleteExpense = async (expenseId: string | number) => {
 
         const backupExpenses = [...expenses];
-        setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense.id !== String(expenseId)));
+        setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense.expenseId !== String(expenseId)));
 
              try {
                         const { error: supabaseError } = await supabase
                                 .from('expenses')
                                 .delete()
-                                .eq('id', expenseId);
+                                .eq('id', Number(expenseId));
 
         if (supabaseError) throw supabaseError;
         } catch (err: any) {
