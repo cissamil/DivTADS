@@ -50,15 +50,16 @@ interface GroupProviderProps {
             .eq('user_id', user?.id)
 
             if(supabaseError) throw supabaseError;
-            const gruposFormatados: GroupEntity[] = data.map((item) => {
+            const rows = data ?? [];
+            const gruposFormatados: GroupEntity[] = rows.map((item: any) => {
                 const group = Array.isArray(item.groups) ? item.groups[0] : item.groups;
 
                 return {
                     id: String(group?.id ?? item.group_id),
-                    name: group?.title ?? '',
+                    title: group?.title ?? '',
                     description: group?.description ?? null,
-                    creatorId: group?.creator_id ? String(group.creator_id) : undefined,
-                    createdAt: group?.created_at,
+                    creatorId: group?.creator_id ? String(group.creator_id) : '',
+                    createdAt: group?.created_at ? new Date(group.created_at) : new Date(),
                     totalBalance: Number(group?.total_balance ?? 0),
                     numberOfMembers: 0,
                     numberOfExpenses: 0
@@ -82,11 +83,11 @@ interface GroupProviderProps {
         const tempId = Date.now().toString();
         const newGroupProvisorio: GroupEntity = {
             id: tempId,
-            name: title,
+            title: title,
             description: description,
             totalBalance: 0,
             creatorId: creatorId,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
             numberOfMembers: 0,
             numberOfExpenses: 0
         };
@@ -104,29 +105,11 @@ interface GroupProviderProps {
             description,
             creator_id: creatorId,
             total_balance: 0
-            }])
-            .select();
+            }]);
 
         if (supabaseError) throw supabaseError;
 
-       
-        if (data && data[0]) {
-            const saved = data[0];
-            const mapped: GroupEntity = {
-                id: String(saved.id ?? ''),
-                name: saved.title,
-                description: saved.description,
-                creatorId: saved.creator_id ? String(saved.creator_id) : undefined,
-                totalBalance: Number(saved.total_balance ?? 0),
-                createdAt: saved.created_at,
-                numberOfMembers: 0,
-                numberOfExpenses: 0
-            };
-
-            setGroups((prevGroups) =>
-                prevGroups.map((g) => (g.id === tempId ? mapped : g))
-            );
-        }
+        await fetchGroups();
         } catch (err: any) {
             setGroups(backupGroups);
             Alert.alert('Erro ao salvar', 'Nao foi possivel criar o grupo no servior :(');
@@ -164,7 +147,7 @@ interface GroupProviderProps {
         try {
             const payload: Record<string, unknown> = {};
 
-            if (newData.name !== undefined) payload.title = newData.name;
+            if (newData.title !== undefined) payload.title = newData.title;
             if (newData.description !== undefined) payload.description = newData.description;
             if (newData.totalBalance !== undefined) payload.total_balance = newData.totalBalance;
 

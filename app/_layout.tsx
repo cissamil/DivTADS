@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
 import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { GroupProvider } from '@/src/contexts/GroupContext';
 
 // Criamos um componente auxiliar para lidar com o roteamento
 const InitialLayout = () => {
@@ -41,7 +42,9 @@ const InitialLayout = () => {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <InitialLayout />
+      <GroupProvider> 
+        <InitialLayout />
+      </GroupProvider>
     </AuthProvider>
   );
 }
