@@ -1,7 +1,7 @@
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useGroups } from '@/src/contexts/GroupContext';
 import { useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Props = {
     visible: boolean;
@@ -13,13 +13,21 @@ export default function CreateGroupModal({ visible, onClose }: Props) {
     const { userData } = useAuth();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [saving, setSaving] = useState(false);
 
     const handleCreate = async () => {
-        if (!title.trim() || !userData?.userId) return;
-        await createGroup(title.trim(), description.trim(), userData.userId);
-        setTitle('');
-        setDescription('');
-        onClose();
+        if (!title.trim() || !userData?.userId || saving) return;
+        try {
+            setSaving(true);
+            await createGroup(title.trim(), description.trim(), userData.userId);
+            setTitle('');
+            setDescription('');
+            onClose();
+        } catch (err) {
+            Alert.alert('Erro', 'Não foi possível criar o grupo.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -53,11 +61,15 @@ export default function CreateGroupModal({ visible, onClose }: Props) {
                     />
 
                     <TouchableOpacity
-                        style={[styles.button, !title.trim() && styles.buttonDisabled]}
+                        style={[styles.button, (!title.trim() || saving) && styles.buttonDisabled]}
                         onPress={handleCreate}
-                        disabled={!title.trim()}
+                        disabled={!title.trim() || saving}
                     >
-                        <Text style={styles.buttonText}>Criar</Text>
+                        {saving ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Criar</Text>
+                        )}
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={onClose}>
