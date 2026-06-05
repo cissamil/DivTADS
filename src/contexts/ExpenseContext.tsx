@@ -12,12 +12,12 @@ interface ExpenseContextData{
     expenses: ExpenseEntity[];
     isLoading: boolean;
     error: string | null;
-    fetchExpenses: (groupId: string | number) => Promise<void>;
+    fetchExpenses: (groupId: string) => Promise<void>;
     createExpense: (
-        groupId: string | number,
+        groupId: string,
         totalAmount: number,
         description?: string,
-        memberId?: string | number | null,
+        memberId?: string,
         category?: string
     ) => Promise<void>;
     deleteExpense: (expenseId: string | number) => Promise<void>;
@@ -40,14 +40,17 @@ interface ExpenseProviderProps {
     const [error, setError] = useState<string | null>(null);
 
     // 1. buscar despesas do Supabase
-    const fetchExpenses = async (groupId: string | number) => {
+    const fetchExpenses = async (groupId: string 
+        
+    ) => {
     setIsLoading(true);
     setError(null);
     try {
         const { data, error: supabaseError } = await supabase
             .from('expenses')
             .select('*')
-            .eq('group_id', Number(groupId))
+            .eq('group_id', 
+                groupId)
             .order('created_at', { ascending: false });
 
         if (supabaseError) throw supabaseError;
@@ -77,10 +80,10 @@ interface ExpenseProviderProps {
 
     // 2. criar despesa com refresh
     const createExpense = async (
-        groupId: string | number,
+        groupId: string,
         totalAmount: number,
         description?: string,
-        memberId?: string | number | null,
+        memberId?: string,
         category?: string
     ) => {
 
@@ -101,7 +104,7 @@ interface ExpenseProviderProps {
             const { error: supabaseError } = await supabase
                 .from('expenses')
                 .insert([{ 
-                    group_id: Number(groupId),
+                    group_id: groupId,
                     member_id: memberId ? Number(memberId) : null,
                     total_amount: totalAmount,
                     description: description ?? null,

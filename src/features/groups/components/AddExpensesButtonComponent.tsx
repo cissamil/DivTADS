@@ -1,12 +1,15 @@
-import { Text } from 'react-native';
-
-import { TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity } from 'react-native';
 import { AddExpensesButtonComponentStyle } from "./styles/GroupDetailsScreenStyle";
 
-export default function AddExpensesComponentButton() {
-    return (
-        <TouchableOpacity style={AddExpensesButtonComponentStyle.fab} onPress={() => console.log('Abrir Modal de Despesa')}>
-            <Text style={AddExpensesButtonComponentStyle.fabText}>+</Text>
-        </TouchableOpacity>
-    )
+interface Props {
+  onPress: () => void;
 }
+
+export default function AddExpensesComponentButton({ onPress }: Props) {
+  return (
+    <TouchableOpacity style={AddExpensesButtonComponentStyle.fab} onPress={onPress}>
+      <Text style={AddExpensesButtonComponentStyle.fabText}>+</Text>
+    </TouchableOpacity>
+  );
+}
+

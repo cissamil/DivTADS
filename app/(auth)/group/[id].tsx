@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { MemberEntity } from '@/src/features/groups/models/MemberEntity';
@@ -11,19 +11,24 @@ import GroupSummaryComponent from '@/src/features/groups/components/GroupSummary
 import InviteUserButtonComponent from '@/src/features/groups/components/InviteUserButtonComponent';
 import AddExpensesComponentButton from '@/src/features/groups/components/AddExpensesButtonComponent';
 import { GroupDetailsScreenStyle } from '@/src/features/groups/components/styles/GroupDetailsScreenStyle';
+import { useExpense } from '@/src/contexts/ExpenseContext';
+import AddExpenseModalComponent from '@/src/features/groups/components/AddExpenseModalComponent';
 
 export default function GroupDetailsScreen() {
   const { id, groupName } = useLocalSearchParams();
   const groupId: string = id as string;
+  console.log(groupId);
 
   // Estado local para gerenciar o menu seletor (Toggle interno)
   const [activeTab, setActiveTab] = useState<'expenses' | 'members'>('expenses');
 
-  // Mocks estruturais provisórios para visualização do esqueleto
-  const mockExpenses: ExpenseEntity[] = [
-    { expenseId: '1', groupId: groupId, description: 'Supermercado', totalAmount: 150.00, memberId: 'Você' },
-    { expenseId: '2', groupId: groupId, description: 'Churrasco', totalAmount: 240.00, memberId: 'Luiz' },
-  ];
+  //despesas
+  const { expenses, fetchExpenses } = useExpense();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    fetchExpenses(groupId);
+  }, [groupId]);
 
   const mockMembers: MemberEntity[] = [
     { memberId: '1', memberName: 'Você', balance: 45.00 },
@@ -50,14 +55,21 @@ export default function GroupDetailsScreen() {
       <View style={GroupDetailsScreenStyle.contentContainer}>
         {activeTab === 'expenses'
 
-          ? <ExpensesListComponent expenses={mockExpenses}/>
+          ? <ExpensesListComponent expenses={expenses} />
           : <MembersListComponent members={mockMembers}/>
         }
       </View>
 
-      {activeTab === 'expenses' && <AddExpensesComponentButton />}
+      {activeTab === 'expenses' && <AddExpensesComponentButton onPress={() => setModalVisible(true)} />}
       {activeTab === 'members' && <InviteUserButtonComponent groupId={groupId} groupName={groupName as string}/>}
-    </View>
+
+      <AddExpenseModalComponent
+          visible={modalVisible}
+          groupId={groupId}
+          onClose={() => setModalVisible(false)}
+        />
+      </View>
+
   );
 }
 

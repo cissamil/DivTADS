@@ -4,6 +4,7 @@ import { Slot, useRootNavigationState, useRouter, useSegments } from 'expo-route
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GroupProvider } from '@/src/contexts/GroupContext';
+import { ExpenseProvider } from '@/src/contexts/ExpenseContext';
 
 // Criamos um componente auxiliar para lidar com o roteamento
 const InitialLayout = () => {
@@ -42,8 +43,10 @@ const InitialLayout = () => {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <GroupProvider> 
-        <InitialLayout />
+      <GroupProvider>
+        <ExpenseProvider>
+          <InitialLayout />
+        </ExpenseProvider>
       </GroupProvider>
     </AuthProvider>
   );
