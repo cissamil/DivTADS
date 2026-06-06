@@ -1,68 +1,63 @@
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useGroup } from '@/src/contexts/GroupContext';
+import CreateGroupModalComponent from '@/src/features/groups/components/CreateGroupModalComponent';
 import GroupCardComponent from '@/src/features/home/components/GroupCardComponent';
-import { GroupEntity } from '@/src/features/home/models/GroupEntity';
-import { GroupService } from '@/src/features/home/services/groupService';
+import { GroupComposition } from '@/src/features/home/models/GroupComposition';
 import { NumberFormatter } from '@/src/utils/formatMoney';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Text, View, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
-import CreateGroupModalComponent from '@/src/features/groups/components/CreateGroupModalComponent';
 
 
 const numberFormatter: NumberFormatter = new NumberFormatter();
-const groupService: GroupService = new GroupService();
 
 export default function Home() {
 
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const {userData, logout} = useAuth();
-  const [groups, setGroups] = useState<GroupEntity[]>([]);
-  const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0 )
+  const { userData } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
+  const { fetchGroups, selectGroup, groupsList: groups, createGroup } = useGroup();
+  const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0)
+
   
   useFocusEffect(
-    useCallback(() =>{
-
-      if(!userData?.userId) return;
-
-      const fetchedGroups = async () => {
-        console.log("Buscando grupos atualizados (Tela em Foco)...");
-        const response = await groupService.getGroupsGeneralInformationsByUserId(userData.userId);
-
-        if (response) {
-          setGroups(response);
-        }
-      };
-
-      fetchedGroups();
+    useCallback(() => {
+      
+      if (!userData?.userId) return;
+      
+      fetchGroups(userData.userId);
     }, [userData?.userId])
   )
 
-  const openGroupDetails = (groupId: string, groupName: string) => {
+  const handleGroupCreation = async (title: string, description: string, userId: string) => {
+    await createGroup(title, description, userId);
+    setModalVisible(false);
+  }
+
+  const openGroupDetails = (group: GroupComposition) => {
     console.log("Redirecting...");
+
+    selectGroup(group);
+
     router.push({
       pathname: '/group/[id]',
       params: {
-        id: groupId,
-        groupName: groupName
+        id: group.id,
+        groupName: group.title
       }
     });
   }
 
-
-  // const groups : GroupEntity[] = [];
-
- return (
+  return (
     <SafeAreaView style={{ flex: 1 }} edges={{ top: "off", bottom: "off" }}>
       <View style={HomeScreenStyles.container}>
 
         {/* Header */}
         <View style={[HomeScreenStyles.header, { paddingTop: insets.top }]}>
           <Text style={HomeScreenStyles.headerTitle}>{userData?.name ?? "Usuario"} - MEUS GRUPOS</Text>
-          <Text style={[HomeScreenStyles.headerTitle, HomeScreenStyles.signOut]} onPress={logout}>Sair da sua conta</Text>
         </View>
 
         <FlatList
@@ -89,7 +84,7 @@ export default function Home() {
           renderItem={({ item }) => (
             <GroupCardComponent
               group={item}
-              onClick={() => openGroupDetails(item.id, item.title)}
+              onClick={() => openGroupDetails(item)}
             />
           )}
         />
@@ -106,10 +101,10 @@ export default function Home() {
 
         {/* Modal Criar Grupo */}
         <CreateGroupModalComponent
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-           />
-
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onCreate={handleGroupCreation}
+        />
       </View>
     </SafeAreaView>
   );

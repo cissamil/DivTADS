@@ -1,26 +1,26 @@
-import {
-    createContext,
-    ReactNode,
-    useContext,
-    useState
-} from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { Alert } from 'react-native';
-import { GroupEntity } from '../features/home/models/GroupEntity';
+import { GroupComposition } from '../features/home/models/GroupComposition';
+import { GroupDomain } from '../features/home/models/GroupDomain';
+import { GroupService } from '../features/home/services/groupService';
 import { supabase } from '../utils/supabase';
-import { useAuth } from './AuthContext';
+
+const groupService: GroupService = new GroupService();
 
 interface GroupContextData {
-    groups: GroupEntity[];
+    groupsList: GroupComposition[];
+    selectedGroup: GroupComposition | null;
     isLoading: boolean;
     error: string | null;
-    fetchGroups: () => Promise<void>;
+    fetchGroups: (userId: string) => Promise<void>;
     createGroup: (
-        title: string, 
-        description: string, 
+    title: string,
+        description: string,
         creatorId: string
     ) => Promise<void>;
     deleteGroup: (groupId: string) => Promise<void>;
-    editGroup: (groupId: string, newData: Partial<GroupEntity>) => Promise<void>;
+    editGroup: (groupId: string, newData: Partial<GroupComposition>) => Promise<void>;
+    selectGroup: (group: GroupComposition) => void;
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -33,110 +33,80 @@ interface GroupProviderProps {
 }
 
 //Provider
- export function GroupProvider({ children }: GroupProviderProps){
-    const [groups, setGroups] = useState<GroupEntity[]>([]);
-    const[isLoading, setIsLoading] = useState<boolean>(false);
-    const[error, setError] = useState<string | null>(null);
-    const { user } = useAuth();
+export function GroupProvider({ children }: GroupProviderProps) {
+    const [groups, setGroups] = useState<GroupComposition[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [selectedGroup, setSelectedGroup] = useState<GroupComposition | null>(null);
 
     //1.buscar grupos do supabase
-    const fetchGroups = async () => {
+    const fetchGroups = async (userId: string) => {
         setIsLoading(true);
         setError(null);
-        try{
-        const { data, error: supabaseError } = await supabase
-            .from('members')
-            .select('group_id, groups:groups(id, title, description, total_balance, creator_id, created_at)')
-            .eq('user_id', user?.id)
+        try {
+            const data = await groupService.getGroupsGeneralInformationsByUserId(userId)
 
-            if(supabaseError) throw supabaseError;
-            const rows = data ?? [];
-            const gruposFormatados: GroupEntity[] = rows.map((item: any) => {
-                const group = Array.isArray(item.groups) ? item.groups[0] : item.groups;
-
-                return {
-                    id: String(group?.id ?? item.group_id),
-                    title: group?.title ?? '',
-                    description: group?.description ?? null,
-                    creatorId: group?.creator_id ? String(group.creator_id) : '',
-                    createdAt: group?.created_at ? new Date(group.created_at) : new Date(),
-                    totalBalance: Number(group?.total_balance ?? 0),
-                    numberOfMembers: 0,
-                    numberOfExpenses: 0
-                };
-            });
-
-            setGroups(gruposFormatados);
-        } catch(err:any){
+            if (!data) {
+                setError("Erro ao pegar grupos");
+                return;
+            }
+            
+            setGroups(data);
+        } catch (err: any) {
             console.error('Erro ao buscar grupos:', err.message);
             setError('Nenhum grupo cadastrado. Crie um novo grupo para começar!')
             setGroups([]);
         }
-        
-        finally{
+
+        finally {
             setIsLoading(false);
-            }
-        };
+        }
+    };
+
+    const selectGroup = (group: GroupComposition) =>{
+        setIsLoading(true);
+        setError(null);
+
+        setSelectedGroup(group);
+
+        setIsLoading(false);
+    }
 
     //2.criar grupo com refresh
     const createGroup = async (title: string, description: string, creatorId: string) => {
-        const tempId = Date.now().toString();
-        const newGroupProvisorio: GroupEntity = {
-            id: tempId,
-            title: title,
-            description: description,
-            totalBalance: 0,
-            creatorId: creatorId,
-            createdAt: new Date(),
-            numberOfMembers: 0,
-            numberOfExpenses: 0
-        };
-        //atualiza
-        const backupGroups = [...groups];
-        setGroups((prevGroups) => [newGroupProvisorio, ...prevGroups]);
+        setIsLoading(true);
+        setError(null);
 
-        //salva no supabase
-       
+        const groupDomain = new GroupDomain(title, description, creatorId);
+
+        console.log(`Titulo: ${title}, Descrição: ${description}, Criador: '${creatorId}'`);
+
         try {
-        const { data, error: supabaseError } = await supabase
-            .from('groups')
-            .insert([{ 
-            title,
-            description,
-            creator_id: creatorId,
-            total_balance: 0
-            }]);
+            await groupService.createNewGroup(groupDomain);
 
-        if (supabaseError) throw supabaseError;
+            await fetchGroups(creatorId);
 
-        await fetchGroups();
         } catch (err: any) {
-            setGroups(backupGroups);
+            setError("Erro ao salvar");
             Alert.alert('Erro ao salvar', 'Nao foi possivel criar o grupo no servior :(');
         }
-        };
+
+        setIsLoading(false)
+    };
 
     //3. deletar grupo
     const deleteGroup = async (groupId: string) => {
-        const backupGroups = [...groups];
-        setGroups((prevGroups) => prevGroups.filter((g) => g.id !== groupId));
+        try{
+            await groupService.deleteGroup(groupId);
+            setGroups((prevGroups) => prevGroups.filter((g) => g.id !== groupId));
+        }catch(err){
 
-       try {
-      const { error: supabaseError } = await supabase
-        .from('groups')
-        .delete()
-        .eq('id', groupId);
-
-        if (supabaseError) throw supabaseError;
-        } catch (err: any) {
-        // se falhar no banco, volta o grupo para a tela
-        setGroups(backupGroups);
-        Alert.alert('Erro ao deletar', 'Não foi possível remover o grupo.');
+            return;
         }
     };
 
     //4.editar grupo
-    const editGroup = async (groupId: string, newData: Partial<GroupEntity>) => {
+    const editGroup = async (groupId: string, newData: Partial<GroupComposition>) => {
         const backupGroups = [...groups];
         setGroups((prevGroups) =>
             prevGroups.map((group) =>
@@ -164,13 +134,15 @@ interface GroupProviderProps {
     };
 
     const contextValue: GroupContextData = {
-        groups,
+        groupsList: groups,
+        selectedGroup,
         isLoading,
         error,
         fetchGroups,
         createGroup,
         deleteGroup,
         editGroup,
+        selectGroup
     };
 
     return (
@@ -182,11 +154,4 @@ interface GroupProviderProps {
 }
 
 //useContext
-export function useGroups(){
-    const context = useContext(GroupContext);
-    if(!context){
-        throw new Error('useGroups deve ser usado dentro de um GroupProvider!!!!!');
-
-    }
-    return context;
-}
+export const useGroup = () => useContext(GroupContext);

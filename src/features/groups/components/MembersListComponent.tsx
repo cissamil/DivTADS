@@ -1,12 +1,10 @@
 import { Text } from 'react-native';
-
 import { FlatList, View } from "react-native";
-import { MemberEntity } from "../models/MemberEntity";
 import { MembersListComponentStyle } from "./styles/GroupDetailsScreenStyle";
-
+import { MemberComposition } from '../../home/models/MemberComposition';
 
 interface MembersListProps {
-    members: MemberEntity[]
+    members: MemberComposition[]
 }
 
 export default function MembersListComponent({ members }: MembersListProps) {
@@ -19,9 +17,9 @@ export default function MembersListComponent({ members }: MembersListProps) {
                     <Text style={MembersListComponentStyle.itemTitle}>{item.memberName}</Text>
                     <Text style={[
                         MembersListComponentStyle.memberBalance,
-                        item.balance >= 0 ? MembersListComponentStyle.positiveBalance : MembersListComponentStyle.negativeBalance
+                        item.total_spent >= 0 ? MembersListComponentStyle.positiveBalance : MembersListComponentStyle.negativeBalance
                     ]}>
-                        {item.balance >= 0 ? `+R$ ${item.balance.toFixed(2)}` : `R$ ${item.balance.toFixed(2)}`}
+                        {item.total_spent >= 0 ? `+R$ ${item.total_spent.toFixed(2)}` : `R$ ${item.total_spent.toFixed(2)}`}
                     </Text>
                 </View>
             )}

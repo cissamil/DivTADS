@@ -1,4 +1,4 @@
-export interface GroupEntity {
+export interface GroupComposition {
   id: string;
   title: string;
   numberOfMembers: number;
@@ -8,3 +8,4 @@ export interface GroupEntity {
   creatorId: string;
   createdAt: Date;
 }
+

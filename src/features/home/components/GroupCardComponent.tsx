@@ -1,10 +1,10 @@
 import { NumberFormatter } from '@/src/utils/formatMoney';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { GroupEntity } from '../models/GroupEntity';
+import { GroupComposition } from '../models/GroupComposition';
 import { GroupCardStyles } from './styles/GroupCardComponentStyles';
 
 type GroupCardProps = {
-    group: GroupEntity;
+    group: GroupComposition;
     onClick: () => void;
 };
 
@@ -17,11 +17,6 @@ function isPlural(quantity:number): boolean{
 export default function GroupCardComponent({group, onClick} : GroupCardProps) {
 
     const balance = numberFormatter.formatToMoney(group.totalBalance);
-    
-    const isTotalBalanceNegative = group.totalBalance < 0;
-    const balanceStatus = isTotalBalanceNegative ? "a pagar" : "a receber"
-    const balanceStyle = isTotalBalanceNegative ? GroupCardStyles.negative : GroupCardStyles.positive;
-
     const memberQuantityText = isPlural(group.numberOfMembers) ? "membros" : "membro"
     const expenseQuantityText = isPlural(group.numberOfExpenses) ? "despesas" : "despesa"
 
@@ -38,8 +33,8 @@ export default function GroupCardComponent({group, onClick} : GroupCardProps) {
                     </Text>
                 </View>
                 <View style={GroupCardStyles.groupBalance}>
-                    <Text style={[GroupCardStyles.balanceText, balanceStyle]}> {balance}</Text>
-                    <Text style={GroupCardStyles.statusText}>{balanceStatus}           
+                    <Text style={[GroupCardStyles.balanceText, GroupCardStyles.positive]}> {balance}</Text>
+                    <Text style={GroupCardStyles.statusText}>Total Gasto Pelo Grupo           
                     </Text>
                 </View>
             </View>

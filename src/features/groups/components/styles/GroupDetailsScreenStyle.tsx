@@ -134,10 +134,17 @@ export const GroupSummaryComponentStyle = StyleSheet.create({
     marginBottom: 6,
   },
   summarySubtitle: {
-    color: '#10b981',
     fontSize: 14,
     fontWeight: '500',
   },
+
+  green: {
+    color: 'green'
+  },
+  
+  red: {
+    color: 'red'
+  }
 });
 export const GroupHeaderComponentStyle = StyleSheet.create({
   header: {

@@ -1,25 +1,26 @@
 import { useAuth } from '@/src/contexts/AuthContext';
-import { useGroups } from '@/src/contexts/GroupContext';
+import { useGroup } from '@/src/contexts/GroupContext';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Props = {
     visible: boolean;
+    onCreate: (title:string, description:string, userId:string) => void;
     onClose: () => void;
 }
 
-export default function CreateGroupModal({ visible, onClose }: Props) {
-    const { createGroup } = useGroups();
+export default function CreateGroupModal({ visible, onCreate, onClose }: Props) {
     const { userData } = useAuth();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [saving, setSaving] = useState(false);
 
     const handleCreate = async () => {
+        
         if (!title.trim() || !userData?.userId || saving) return;
         try {
             setSaving(true);
-            await createGroup(title.trim(), description.trim(), userData.userId);
+            onCreate(title, description, userData.userId);
             setTitle('');
             setDescription('');
             onClose();
