@@ -78,15 +78,24 @@ export const ExpensesListComponentStyle = StyleSheet.create({
 
 });
 export const MembersListComponentStyle = StyleSheet.create({
-  cardItem: {
-    flexDirection: 'row',
+  cartInfo: {
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#262626',
+    gap: 10,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    flex: 1
   },
+
+  memberInfo:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#262626',
+    width: '100%'
+  },
+
   itemTitle: {
     color: '#fff',
     fontSize: 15,
@@ -109,6 +118,16 @@ export const MembersListComponentStyle = StyleSheet.create({
   negativeBalance: {
     color: '#ef4444',
   },
+
+  groupCreator:{
+    boxSizing: 'border-box',
+    color: 'white',
+    backgroundColor: '#181818',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 5,
+    padding: 5
+  }
 
 });
 export const GroupSummaryComponentStyle = StyleSheet.create({

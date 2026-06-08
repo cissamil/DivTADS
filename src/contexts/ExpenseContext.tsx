@@ -1,139 +1,87 @@
-import {
-    createContext,
-    ReactNode,
-    useContext,
-    useState
-} from 'react';
 import { Alert } from 'react-native';
-import { ExpenseEntity } from '../features/groups/models/ExpenseEntity';
-import { supabase } from '../utils/supabase';
+import { createContext, ReactNode, useContext, useState } from 'react';
+import { ExpenseComposition } from '../features/groups/models/ExpenseComposition';
+import { ExpenseService } from '../features/groups/services/ExpenseService';
+import { ExpenseDomain } from '../features/groups/models/ExpenseDomain';
 
-interface ExpenseContextData{
-    expenses: ExpenseEntity[];
+
+const expenseService: ExpenseService = new ExpenseService();
+
+interface ExpenseContextData {
+    expenses: ExpenseComposition[];
     isLoading: boolean;
     error: string | null;
     fetchExpenses: (groupId: string) => Promise<void>;
     createExpense: (
         groupId: string,
         totalAmount: number,
+        memberId: string,
         description?: string,
-        memberId?: string,
         category?: string
     ) => Promise<void>;
-    deleteExpense: (expenseId: string | number) => Promise<void>;
+    deleteExpense: (expenseId: string) => Promise<void>;
 }
 
 //createContext
 export const ExpenseContext = createContext<ExpenseContextData>({} as ExpenseContextData)
 
 
-interface ExpenseProviderProps { 
+interface ExpenseProviderProps {
     children: ReactNode;
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
 
 //Provider
- export function ExpenseProvider({ children }: ExpenseProviderProps){
-    const [expenses, setExpenses] = useState<ExpenseEntity[]>([]);
+export function ExpenseProvider({ children }: ExpenseProviderProps) {
+    const [expenses, setExpenses] = useState<ExpenseComposition[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     // 1. buscar despesas do Supabase
-    const fetchExpenses = async (groupId: string 
-        
-    ) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-        const { data, error: supabaseError } = await supabase
-            .from('expenses')
-            .select('*')
-            .eq('group_id', 
-                groupId)
-            .order('created_at', { ascending: false });
+    const fetchExpenses = async (groupId: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
 
-        if (supabaseError) throw supabaseError;
+            const groupExpenses = await expenseService.getExpenseMemberInformationsByUserId(groupId);
 
-        
-        const expensesFormatados: ExpenseEntity[] = (data ?? []).map((row: any) => ({
-            expenseId: String(row.id),
-            groupId: String(row.group_id),
-            memberId: row.member_id ? String(row.member_id) : null,
-            totalAmount: Number(row.total_amount ?? 0),
-            description: row.description ?? null,
-            category: row.category ?? null,
-            createdAt: row.created_at,
-        }));
+            if (groupExpenses) setExpenses(groupExpenses);
 
-        
-        setExpenses(expensesFormatados);
-        
-    } catch (err: any) {
-        console.error('Erro ao buscar despesas:', err.message);
-        setError('Nenhuma despesa cadastrada. Crie uma nova para começar!');
-        setExpenses([]);
-    } finally {
-        setIsLoading(false);
-    }
-};
+        } catch (err: any) {
+            console.error('Erro ao buscar despesas:', err.message);
+            setError('Nenhuma despesa cadastrada. Crie uma nova para começar!');
+            setExpenses([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // 2. criar despesa com refresh
-    const createExpense = async (
-        groupId: string,
-        totalAmount: number,
-        description?: string,
-        memberId?: string,
-        category?: string
-    ) => {
+    const createExpense = async (groupId: string, totalAmount: number, memberId: string, description?: string, category?: string) => {
 
-        const temporaryExpense: ExpenseEntity = {
-            expenseId: String(Date.now()),
-            groupId: String(groupId),
-            memberId: memberId ? String(memberId) : null,
-            totalAmount,
-            description: description ?? null,
-            category: category ?? null,
-            createdAt: new Date().toISOString(),
-        };
+        setIsLoading(true);
 
-        const backupExpenses = [...expenses];
-        setExpenses((prevExpenses) => [temporaryExpense, ...prevExpenses]);
+        const expense = new ExpenseDomain(groupId, memberId, totalAmount, description ?? '', category ?? '');
 
         try {
-            const { error: supabaseError } = await supabase
-                .from('expenses')
-                .insert([{ 
-                    group_id: groupId,
-                    member_id: memberId ? Number(memberId) : null,
-                    total_amount: totalAmount,
-                    description: description ?? null,
-                    category: category ?? null,
-                }]);
+            await expenseService.createNewExpense(expense);
 
-            if (supabaseError) throw supabaseError;
+            await fetchExpenses(groupId);
         } catch (err: any) {
-            setExpenses(backupExpenses);
+            console.error("Erro ao cadastrar a despesa: ", err);
             Alert.alert('Erro ao salvar', 'Não foi possível criar a despesa no servidor :(');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     //3. deletar despesa
-    const deleteExpense = async (expenseId: string | number) => {
-
-        const backupExpenses = [...expenses];
-        setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense.expenseId !== String(expenseId)));
-
-             try {
-                        const { error: supabaseError } = await supabase
-                                .from('expenses')
-                                .delete()
-                                .eq('id', Number(expenseId));
-
-        if (supabaseError) throw supabaseError;
+    const deleteExpense = async (expenseId: string) => {
+        try {
+            await expenseService.deleteExpense(expenseId);
         } catch (err: any) {
-        setExpenses(backupExpenses);
-        Alert.alert('Erro ao deletar', 'Não foi possível remover a despesa.');
+            Alert.alert('Erro ao deletar. Não foi possível remover a despesa: ', err);
         }
     };
 
@@ -157,9 +105,9 @@ interface ExpenseProviderProps {
 }
 
 //useContext
-export function useExpense(){
+export function useExpense() {
     const context = useContext(ExpenseContext);
-    if(!context){
+    if (!context) {
         throw new Error('useExpense deve ser usado dentro de um ExpenseProvider!!!!!');
 
     }

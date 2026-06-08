@@ -1,22 +1,20 @@
-import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { MemberEntity } from '@/src/features/groups/models/MemberEntity';
-import { ExpenseEntity } from '@/src/features/groups/models/ExpenseEntity';
-import GroupHeaderComponent from '@/src/features/groups/components/GroupHeaderComponent';
-import MembersListComponent from '@/src/features/groups/components/MembersListComponent';
-import MenuSelectorComponent from '@/src/features/groups/components/MenuSelectorComponent';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { useExpense } from '@/src/contexts/ExpenseContext';
+import { useGroup } from '@/src/contexts/GroupContext';
+import AddExpenseModalComponent from '@/src/features/groups/components/AddExpenseModalComponent';
+import AddExpensesComponentButton from '@/src/features/groups/components/AddExpensesButtonComponent';
 import ExpensesListComponent from '@/src/features/groups/components/ExpensesListComponent';
+import GroupHeaderComponent from '@/src/features/groups/components/GroupHeaderComponent';
 import GroupSummaryComponent from '@/src/features/groups/components/GroupSummaryComponent';
 import InviteUserButtonComponent from '@/src/features/groups/components/InviteUserButtonComponent';
-import AddExpensesComponentButton from '@/src/features/groups/components/AddExpensesButtonComponent';
+import MembersListComponent from '@/src/features/groups/components/MembersListComponent';
+import MenuSelectorComponent from '@/src/features/groups/components/MenuSelectorComponent';
 import { GroupDetailsScreenStyle } from '@/src/features/groups/components/styles/GroupDetailsScreenStyle';
-import { useExpense } from '@/src/contexts/ExpenseContext';
-import AddExpenseModalComponent from '@/src/features/groups/components/AddExpenseModalComponent';
-import { useGroup } from '@/src/contexts/GroupContext';
 import { MemberComposition } from '@/src/features/home/models/MemberComposition';
 import { MembersService } from '@/src/features/home/services/MembersService';
-import { useAuth } from '@/src/contexts/AuthContext';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 const membersService: MembersService = new MembersService();
 
@@ -24,7 +22,6 @@ export default function GroupDetailsScreen() {
 
   const { id, groupName } = useLocalSearchParams();
   const groupId: string = id as string;
-  console.log(groupId);
 
   // Estado local para gerenciar o menu seletor (Toggle interno)
   const [activeTab, setActiveTab] = useState<'expenses' | 'members'>('expenses');
@@ -32,7 +29,7 @@ export default function GroupDetailsScreen() {
   const  {userData} = useAuth();
 
   //despesas
-  const {expenses, fetchExpenses } = useExpense();
+  const {expenses, fetchExpenses} = useExpense();
   const [modalVisible, setModalVisible] = useState(false);
 
   const {selectedGroup} = useGroup();
@@ -41,7 +38,7 @@ export default function GroupDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchExpenses(groupId);
+    const fetchNewExpenses = async () => {await fetchExpenses(groupId)};
 
     const fetchMembersInformation = async (groupId: string) =>{
       setIsLoading(true);
@@ -56,10 +53,12 @@ export default function GroupDetailsScreen() {
       setIsLoading(false)
     }
 
+    fetchNewExpenses();
     fetchMembersInformation(groupId);
   }, [groupId]);
 
   const currentMember = members.find((member) => member.userId == userData?.userId);
+  const groupCreator = members.find((members) => members.userId == selectedGroup?.creatorId)
 
   // 3. Tratamento de Loading visualmente agradável antes do tratamento de Erro
   if (isLoading) {
@@ -71,7 +70,7 @@ export default function GroupDetailsScreen() {
   }
 
   // Se terminou de carregar e mesmo assim faltou dado, aí sim mostramos erro
-  if (!selectedGroup || !currentMember) {
+  if (!selectedGroup || !currentMember || !groupCreator) {
     return (
       <View style={[GroupDetailsScreenStyle.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={{ color: 'red' }}>Erro ao pegar informações do Grupo</Text>
@@ -100,7 +99,7 @@ export default function GroupDetailsScreen() {
         {activeTab === 'expenses'
 
           ? <ExpensesListComponent expenses={expenses} />
-          : <MembersListComponent members={members}/>
+          : <MembersListComponent members={members} currentMemberId={currentMember.memberId} creatorId={groupCreator?.userId}/>
         }
       </View>
 
@@ -110,6 +109,7 @@ export default function GroupDetailsScreen() {
       <AddExpenseModalComponent
           visible={modalVisible}
           groupId={groupId}
+          memberId={currentMember.memberId}
           onClose={() => setModalVisible(false)}
         />
       </View>

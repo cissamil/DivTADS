@@ -1,14 +1,20 @@
 import { Text } from 'react-native';
 
 import { FlatList, View } from "react-native";
-import { ExpenseEntity } from "../models/ExpenseEntity";
+import { ExpenseComposition } from "../models/ExpenseComposition";
 import { ExpensesListComponentStyle } from "./styles/GroupDetailsScreenStyle";
+import { NumberFormatter } from '@/src/utils/formatMoney';
 
 interface ExpanseListProps {
-    expenses: ExpenseEntity[];
+    expenses: ExpenseComposition[];
 }
 
 export default function ExpensesListComponent({ expenses }: ExpanseListProps) {
+
+    const formatedValue = (value:number) =>{
+        return NumberFormatter.formatToMoney(value);
+    }
+
     return (
         <FlatList
             data={expenses}
@@ -17,9 +23,9 @@ export default function ExpensesListComponent({ expenses }: ExpanseListProps) {
                 <View style={ExpensesListComponentStyle.cardItem}>
                     <View>
                         <Text style={ExpensesListComponentStyle.itemTitle}>{item.description}</Text>
-                        <Text style={ExpensesListComponentStyle.itemSubtitle}>Pago por {item.memberId}</Text>
+                        <Text style={ExpensesListComponentStyle.itemSubtitle}>Pago por {item.memberName}</Text>
                     </View>
-                    <Text style={ExpensesListComponentStyle.itemAmount}>R$ {item.totalAmount.toFixed(2)}</Text>
+                    <Text style={ExpensesListComponentStyle.itemAmount}>{formatedValue(item.totalAmount)}</Text>
                 </View>
             )}
             ListEmptyComponent={

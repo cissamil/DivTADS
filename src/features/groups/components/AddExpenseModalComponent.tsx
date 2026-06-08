@@ -5,10 +5,11 @@ import { useExpense } from '@/src/contexts/ExpenseContext';
 interface Props {
   visible: boolean;
   groupId: string;
+  memberId: string;
   onClose: () => void;
 }
 
-export default function AddExpenseModalComponent({ visible, groupId, onClose }: Props) {
+export default function AddExpenseModalComponent({ visible, groupId, memberId, onClose }: Props) {
   const { createExpense } = useExpense();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -19,7 +20,7 @@ export default function AddExpenseModalComponent({ visible, groupId, onClose }: 
       Alert.alert('Preencha todos os campos');
       return;
     }
-    await createExpense(groupId, total, description);
+    await createExpense(groupId, total, memberId, description);
     setDescription('');
     setAmount('');
     onClose();
