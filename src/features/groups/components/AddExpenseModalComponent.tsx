@@ -18,6 +18,7 @@ export default function AddExpenseModalComponent({ visible, groupId, memberId, o
   const { createExpense, fetchExpenses } = useExpense();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
+  const [amountValue, setAmountValue] = useState(0);
 
   const [imageUri, setImageUri] = useState<string | null>(null);
 
@@ -33,8 +34,30 @@ export default function AddExpenseModalComponent({ visible, groupId, memberId, o
     setAmount('');
     setImageUri(null);
   }
+
+  const handleAmountChange = (text: string) => {
+    const numericText = text.replace(/\D/g, '');
+
+    if (!numericText) {
+      setAmount('');
+      return;
+    }
+
+    const floatValue = parseInt(numericText, 10) / 100;
+
+    const formattedText = floatValue
+      .toFixed(2)          
+      .replace('.', ',')    
+      .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); 
+
+    setAmount(formattedText);
+  };
+  
   const handleSave = async () => {
-    const total = parseFloat(amount.replace(',', '.'));
+
+    const cleanNumericString = amount.replace(/\./g, '').replace(',', '.');
+    const total = parseFloat(cleanNumericString);
+
     if (!description || isNaN(total)) {
       Alert.alert('Preencha todos os campos');
       return;
@@ -56,20 +79,22 @@ export default function AddExpenseModalComponent({ visible, groupId, memberId, o
             onChangeText={setDescription}
             style={{ backgroundColor: '#2a2a2a', color: '#fff', padding: 12, borderRadius: 8, marginBottom: 12 }}
           />
+
+
           <TextInput
             placeholder="Valor (ex: 150,00)"
             placeholderTextColor="#888"
             value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
+            onChangeText={handleAmountChange}
+            keyboardType="number-pad"
             style={{ backgroundColor: '#2a2a2a', color: '#fff', padding: 12, borderRadius: 8, marginBottom: 24 }}
           />
-          {/* Botão de Integração Nativa: Câmara */}
+
+          
           <TouchableOpacity style={styles.cameraButton} onPress={generateImageUri}>
             <Text style={styles.cameraButtonText}>📸 Anexar Foto do Recibo</Text>
           </TouchableOpacity>
 
-          {/* Mostra uma miniatura da foto se o utilizador tirou uma */}
           {imageUri && (
             <Image source={{ uri: imageUri }} style={styles.previewImage} />
           )}

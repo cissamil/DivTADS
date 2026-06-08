@@ -1,4 +1,4 @@
-import { NumberFormatter } from '@/src/utils/formatMoney';
+import { NumberFormatter } from '@/src/utils/NumberFormatter';
 import { FlatList, Text, View } from 'react-native';
 import { MemberComposition } from '../../home/models/MemberComposition';
 import { MembersListComponentStyle } from "./styles/GroupDetailsScreenStyle";

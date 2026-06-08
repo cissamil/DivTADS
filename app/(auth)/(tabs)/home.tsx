@@ -3,7 +3,7 @@ import { useGroup } from '@/src/contexts/GroupContext';
 import CreateGroupModalComponent from '@/src/features/groups/components/CreateGroupModalComponent';
 import GroupCardComponent from '@/src/features/home/components/GroupCardComponent';
 import { GroupComposition } from '@/src/features/home/models/GroupComposition';
-import { NumberFormatter } from '@/src/utils/formatMoney';
+import { NumberFormatter } from '@/src/utils/NumberFormatter';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

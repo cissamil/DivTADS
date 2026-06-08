@@ -1,4 +1,4 @@
-import { NumberFormatter } from '@/src/utils/formatMoney';
+import { NumberFormatter } from '@/src/utils/NumberFormatter';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { GroupComposition } from '../models/GroupComposition';
 import { GroupCardStyles } from './styles/GroupCardComponentStyles';

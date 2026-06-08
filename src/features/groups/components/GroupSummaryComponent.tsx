@@ -1,7 +1,6 @@
-import { Text } from 'react-native';
-import { View } from "react-native";
+import { NumberFormatter } from '@/src/utils/NumberFormatter';
+import { Text, View } from 'react-native';
 import { GroupSummaryComponentStyle } from "./styles/GroupDetailsScreenStyle";
-import { NumberFormatter } from '@/src/utils/formatMoney';
 
 interface GroupInformationProps{
 

@@ -1,9 +1,9 @@
 import { Text } from 'react-native';
 
+import { NumberFormatter } from '@/src/utils/NumberFormatter';
 import { FlatList, View } from "react-native";
 import { ExpenseComposition } from "../models/ExpenseComposition";
 import { ExpensesListComponentStyle } from "./styles/GroupDetailsScreenStyle";
-import { NumberFormatter } from '@/src/utils/formatMoney';
 
 interface ExpanseListProps {
     expenses: ExpenseComposition[];

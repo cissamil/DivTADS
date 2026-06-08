@@ -6,5 +6,8 @@ export class NumberFormatter{
             currency: currency,
         }).format(amount);
     }
+
+
+    
 }
 
