@@ -2,7 +2,7 @@ import { createContext, ReactNode, useContext, useState } from 'react';
 import { Alert } from 'react-native';
 import { GroupComposition } from '../features/home/models/GroupComposition';
 import { GroupDomain } from '../features/home/models/GroupDomain';
-import { GroupService } from '../features/home/services/GroupService';
+import { GroupService } from '../features/services/GroupService';
 import { supabase } from '../utils/supabase';
 
 const groupService: GroupService = new GroupService();

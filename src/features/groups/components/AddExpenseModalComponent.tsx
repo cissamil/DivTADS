@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useExpense } from '@/src/contexts/ExpenseContext';
+import { StorageService } from '../../services/StorageService';
+import { StyleSheet } from 'react-native';
+import { Image } from 'react-native';
 
 interface Props {
   visible: boolean;
@@ -9,20 +12,35 @@ interface Props {
   onClose: () => void;
 }
 
+const storageService: StorageService = new StorageService();
+
 export default function AddExpenseModalComponent({ visible, groupId, memberId, onClose }: Props) {
-  const { createExpense } = useExpense();
+  const { createExpense, fetchExpenses } = useExpense();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
 
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const generateImageUri = async () => {
+    const uri = await storageService.openCamera(groupId)
+
+    setImageUri(uri)
+
+  }
+  
+  const cleanForm = () =>{
+    setDescription('');
+    setAmount('');
+    setImageUri(null);
+  }
   const handleSave = async () => {
     const total = parseFloat(amount.replace(',', '.'));
     if (!description || isNaN(total)) {
       Alert.alert('Preencha todos os campos');
       return;
     }
-    await createExpense(groupId, total, memberId, description);
-    setDescription('');
-    setAmount('');
+    await createExpense(groupId, total, memberId, description, "", imageUri ?? "");
+    cleanForm();
     onClose();
   };
 
@@ -46,10 +64,19 @@ export default function AddExpenseModalComponent({ visible, groupId, memberId, o
             keyboardType="decimal-pad"
             style={{ backgroundColor: '#2a2a2a', color: '#fff', padding: 12, borderRadius: 8, marginBottom: 24 }}
           />
+          {/* Botão de Integração Nativa: Câmara */}
+          <TouchableOpacity style={styles.cameraButton} onPress={generateImageUri}>
+            <Text style={styles.cameraButtonText}>📸 Anexar Foto do Recibo</Text>
+          </TouchableOpacity>
+
+          {/* Mostra uma miniatura da foto se o utilizador tirou uma */}
+          {imageUri && (
+            <Image source={{ uri: imageUri }} style={styles.previewImage} />
+          )}
           <TouchableOpacity onPress={handleSave} style={{ backgroundColor: '#6c63ff', padding: 14, borderRadius: 8, alignItems: 'center' }}>
             <Text style={{ color: '#fff' }}>Salvar</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={{ padding: 14, alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => {onClose(), cleanForm()} } style={{ padding: 14, alignItems: 'center' }}>
             <Text style={{ color: '#888' }}>Cancelar</Text>
           </TouchableOpacity>
         </View>
@@ -57,3 +84,18 @@ export default function AddExpenseModalComponent({ visible, groupId, memberId, o
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
+    content: { backgroundColor: '#1a1a1a', padding: 24, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+    title: { color: '#fff', fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
+    input: { backgroundColor: '#262626', color: '#fff', padding: 15, borderRadius: 10, marginBottom: 15, borderWidth: 1, borderColor: '#333' },
+    cameraButton: { backgroundColor: '#333', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 15, borderStyle: 'dashed', borderWidth: 1, borderColor: '#666' },
+    cameraButtonText: { color: '#fff', fontWeight: '600' },
+    previewImage: { width: 100, height: 100, borderRadius: 10, marginBottom: 15, alignSelf: 'center' },
+    saveButton: { backgroundColor: '#6366f1', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
+    disabledButton: { opacity: 0.5 },
+    saveButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+    cancelButton: { padding: 15, alignItems: 'center' },
+    cancelButtonText: { color: '#ef4444', fontWeight: '600' }
+});

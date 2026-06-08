@@ -1,11 +1,12 @@
 import { supabase } from "@/src/utils/supabase";
 import { Alert } from "react-native";
-import { GroupComposition } from "../models/GroupComposition";
-import { GroupDomain } from "../models/GroupDomain";
+import { GroupComposition } from "../home/models/GroupComposition";
+import { GroupDomain } from "../home/models/GroupDomain";
 
 export class GroupService {
-  
-  public async getGroupsGeneralInformationsByUserId(userId: string): Promise<GroupComposition[] | null> {
+  public async getGroupsGeneralInformationsByUserId(
+    userId: string,
+  ): Promise<GroupComposition[] | null> {
     const { data, error } = await supabase
       .from("v_user_groups_summary")
       .select("*")

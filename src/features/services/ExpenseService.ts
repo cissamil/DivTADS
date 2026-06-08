@@ -1,10 +1,11 @@
 import { supabase } from "@/src/utils/supabase";
-import { ExpenseDomain } from "../models/ExpenseDomain";
-import { ExpenseComposition } from "../models/ExpenseComposition";
+import { ExpenseComposition } from "../groups/models/ExpenseComposition";
+import { ExpenseDomain } from "../groups/models/ExpenseDomain";
 
 export class ExpenseService {
-  public async getExpenseMemberInformationsByUserId(groupId: string): Promise<ExpenseComposition[] | null> {
-
+  public async getExpenseMemberInformationsByUserId(
+    groupId: string,
+  ): Promise<ExpenseComposition[] | null> {
     const { data, error } = await supabase
       .from("v_expense_member_information")
       .select("*")
@@ -33,6 +34,7 @@ export class ExpenseService {
     const total_amount = expense.getTotalAmount();
     const description = expense.getDescription();
     const category = expense.getCategory();
+    const receipt_url = expense.getReceiptUrl();
 
     try {
       const { error: supabaseError } = await supabase.from("expenses").insert([
@@ -42,6 +44,7 @@ export class ExpenseService {
           total_amount,
           description,
           category,
+          receipt_url,
         },
       ]);
 
@@ -51,17 +54,16 @@ export class ExpenseService {
     }
   }
 
-  public async deleteExpense(expenseId: string){
-    
+  public async deleteExpense(expenseId: string) {
     try {
-        const { error: supabaseError } = await supabase
-            .from('expenses')
-            .delete()
-            .eq('id', Number(expenseId));
+      const { error: supabaseError } = await supabase
+        .from("expenses")
+        .delete()
+        .eq("id", Number(expenseId));
 
-        if (supabaseError) throw supabaseError;
+      if (supabaseError) throw supabaseError;
     } catch (err: any) {
-        throw Error("Erro ao deletar despesa: ", err);
+      throw Error("Erro ao deletar despesa: ", err);
     }
   }
 }

@@ -11,7 +11,7 @@ import MembersListComponent from '@/src/features/groups/components/MembersListCo
 import MenuSelectorComponent from '@/src/features/groups/components/MenuSelectorComponent';
 import { GroupDetailsScreenStyle } from '@/src/features/groups/components/styles/GroupDetailsScreenStyle';
 import { MemberComposition } from '@/src/features/home/models/MemberComposition';
-import { MembersService } from '@/src/features/home/services/MembersService';
+import { MembersService } from '@/src/features/services/MembersService';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';

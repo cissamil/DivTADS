@@ -11,8 +11,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
 
 
-const numberFormatter: NumberFormatter = new NumberFormatter();
-
 export default function Home() {
 
   const insets = useSafeAreaInsets();
@@ -68,7 +66,7 @@ export default function Home() {
             <>
               <View style={HomeScreenStyles.balanceCard}>
                 <Text style={HomeScreenStyles.balanceLabel}>saldo consolidado</Text>
-                <Text style={HomeScreenStyles.balanceValue}>{numberFormatter.formatToMoney(generalBalance)}</Text>
+                <Text style={HomeScreenStyles.balanceValue}>{NumberFormatter.formatToMoney(generalBalance)}</Text>
                 <Text style={HomeScreenStyles.balanceSubtitle}>em {groups.length} grupos ativos</Text>
               </View>
               <Text style={HomeScreenStyles.sectionTitle}>grupos</Text>

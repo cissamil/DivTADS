@@ -1,8 +1,8 @@
-import { Alert } from 'react-native';
 import { createContext, ReactNode, useContext, useState } from 'react';
+import { Alert } from 'react-native';
 import { ExpenseComposition } from '../features/groups/models/ExpenseComposition';
-import { ExpenseService } from '../features/groups/services/ExpenseService';
 import { ExpenseDomain } from '../features/groups/models/ExpenseDomain';
+import { ExpenseService } from '../features/services/ExpenseService';
 
 
 const expenseService: ExpenseService = new ExpenseService();
@@ -17,7 +17,8 @@ interface ExpenseContextData {
         totalAmount: number,
         memberId: string,
         description?: string,
-        category?: string
+        category?: string,
+        receiptUrl?: string,
     ) => Promise<void>;
     deleteExpense: (expenseId: string) => Promise<void>;
 }
@@ -58,11 +59,11 @@ export function ExpenseProvider({ children }: ExpenseProviderProps) {
     };
 
     // 2. criar despesa com refresh
-    const createExpense = async (groupId: string, totalAmount: number, memberId: string, description?: string, category?: string) => {
+    const createExpense = async (groupId: string, totalAmount: number, memberId: string, description?: string, category?: string, receiptUrl?: string) => {
 
         setIsLoading(true);
 
-        const expense = new ExpenseDomain(groupId, memberId, totalAmount, description ?? '', category ?? '');
+        const expense = new ExpenseDomain(groupId, memberId, totalAmount, description ?? '', category ?? '', receiptUrl ?? '');
 
         try {
             await expenseService.createNewExpense(expense);
@@ -81,7 +82,7 @@ export function ExpenseProvider({ children }: ExpenseProviderProps) {
         try {
             await expenseService.deleteExpense(expenseId);
         } catch (err: any) {
-            Alert.alert('Erro ao deletar. Não foi possível remover a despesa: ', err);
+            Alert.alert('Erro ao deletar.", "Não foi possível remover a despesa: ' + err);
         }
     };
 

@@ -8,15 +8,13 @@ type GroupCardProps = {
     onClick: () => void;
 };
 
-const numberFormatter: NumberFormatter = new NumberFormatter();
-
 function isPlural(quantity:number): boolean{
     return quantity > 1;
 }
 
 export default function GroupCardComponent({group, onClick} : GroupCardProps) {
 
-    const balance = numberFormatter.formatToMoney(group.totalBalance);
+    const balance = NumberFormatter.formatToMoney(group.totalBalance);
     const memberQuantityText = isPlural(group.numberOfMembers) ? "membros" : "membro"
     const expenseQuantityText = isPlural(group.numberOfExpenses) ? "despesas" : "despesa"
 

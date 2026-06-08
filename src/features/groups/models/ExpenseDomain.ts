@@ -6,6 +6,7 @@ export class ExpenseDomain {
     totalAmount: number,
     description: string,
     category: string,
+    receiptUrl: string
   ) {
 
     this.groupId = groupId
@@ -13,6 +14,7 @@ export class ExpenseDomain {
     this.totalAmount= totalAmount
     this.description = description
     this.category = category
+    this.receiptUrl = receiptUrl;
   }
 
 
@@ -21,6 +23,7 @@ export class ExpenseDomain {
   public getTotalAmount() { return this.totalAmount;}
   public getDescription() { return this.description;}
   public getCategory() { return this.category;}
+  public getReceiptUrl() {return this.receiptUrl;}
 
 
   private groupId: string;
@@ -28,4 +31,5 @@ export class ExpenseDomain {
   private totalAmount: number;
   private description: string;
   private category: string;
+  private receiptUrl:string;
 }
