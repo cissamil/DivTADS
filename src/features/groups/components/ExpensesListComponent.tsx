@@ -1,12 +1,11 @@
-import { Modal, StyleSheet, Text, TouchableOpacity } from 'react-native';
-
+import { useState } from 'react';
+import { Image } from 'react-native';
 import { NumberFormatter } from '@/src/utils/NumberFormatter';
 import { FlatList, View, RefreshControl } from "react-native";
 import { ExpenseComposition } from "../models/ExpenseComposition";
-import { ExpensesListComponentStyle } from "./styles/GroupDetailsScreenStyle";
-import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ExpensesListComponentStyle } from "./styles/GroupDetailsScreenStyle";
 
 interface ExpanseListProps {
     expenses: ExpenseComposition[];

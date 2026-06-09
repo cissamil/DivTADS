@@ -1,15 +1,17 @@
 import { NumberFormatter } from '@/src/utils/NumberFormatter';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, RefreshControl, Text, View } from 'react-native';
 import { MemberComposition } from '../../home/models/MemberComposition';
 import { MembersListComponentStyle } from "./styles/GroupDetailsScreenStyle";
 
 interface MembersListProps {
     members: MemberComposition[],
     creatorId: string,
-    currentMemberId:string
+    currentMemberId:string,
+    refreshing: boolean;
+    onRefresh: () => void;
 }
 
-export default function MembersListComponent({ members, creatorId, currentMemberId}: MembersListProps) {
+export default function MembersListComponent({ members, creatorId, currentMemberId, refreshing, onRefresh}: MembersListProps) {
 
     const formatedValue = (value:number) =>{
         return NumberFormatter.formatToMoney(value);
@@ -17,9 +19,6 @@ export default function MembersListComponent({ members, creatorId, currentMember
 
 
     const groupRoleLabel = (member: MemberComposition) =>{
-
-        const label = "";
-
         const isCreatorId =  member.userId === creatorId;
         const isCurrentMember = member.memberId === currentMemberId;
 
@@ -48,6 +47,11 @@ export default function MembersListComponent({ members, creatorId, currentMember
         <FlatList
             data={members}
             keyExtractor={(item) => item.memberId}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />}
             renderItem={({ item }) => (
                 <View style={MembersListComponentStyle.cartInfo}>
 

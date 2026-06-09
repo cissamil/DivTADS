@@ -27,13 +27,13 @@ export default function GroupDetailsScreen() {
 
   const [activeTab, setActiveTab] = useState<'expenses' | 'members'>('expenses');
 
-  const  {userData} = useAuth();
+  const { userData } = useAuth();
 
   //despesas
-  const {expensesByGroup, fetchExpensesByGroup} = useExpense();
+  const { expensesByGroup, fetchExpensesByGroup } = useExpense();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const {selectedGroup} = useGroup();
+  const { selectedGroup } = useGroup();
 
   const [members, setMembers] = useState<MemberComposition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,22 +41,34 @@ export default function GroupDetailsScreen() {
   //pull to refresh
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = async () => {
+  const onExpensesRefresh = async () => {
     setRefreshing(true);
     await fetchExpensesByGroup(groupId);
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    const fetchNewExpenses = async () => {await fetchExpensesByGroup(groupId)};
+  const onMembersRefresh = async () => {
+    setRefreshing(true);
 
-    const fetchMembersInformation = async (groupId: string) =>{
+    const newMembers = await membersService.getGroupsGeneralInformationsByUserId(groupId);
+
+    if (newMembers) {
+      setMembers(newMembers);
+    }
+
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    const fetchNewExpenses = async () => { await fetchExpensesByGroup(groupId) };
+
+    const fetchMembersInformation = async (groupId: string) => {
       setIsLoading(true);
 
       const members = await membersService.getGroupsGeneralInformationsByUserId(groupId);
 
-      if(members){
-        
+      if (members) {
+
         setMembers(members);
       }
 
@@ -88,36 +100,48 @@ export default function GroupDetailsScreen() {
 
 
   return (
-    <View style={[GroupDetailsScreenStyle.container, {paddingBottom: insets.bottom + 10, paddingTop: 10}]}>
+    <View style={[GroupDetailsScreenStyle.container, { paddingBottom: insets.bottom + 10, paddingTop: 10 }]}>
 
       <GroupHeaderComponent groupName={groupName as string} />
 
       <GroupSummaryComponent total_balance={selectedGroup.totalBalance} currentUserTotalSpent={currentMember.total_spent} />
 
-      <MenuSelectorComponent 
-        activeTab={activeTab} 
-        selectExpenses={() => setActiveTab('expenses')} 
+      <MenuSelectorComponent
+        activeTab={activeTab}
+        selectExpenses={() => setActiveTab('expenses')}
         selectMembers={() => setActiveTab('members')}
       />
 
       <View style={GroupDetailsScreenStyle.contentContainer}>
         {activeTab === 'expenses'
 
-          ? <ExpensesListComponent expenses={expensesByGroup} refreshing={refreshing} onRefresh={onRefresh} screenOption='GroupDetailsScreen' />
-          : <MembersListComponent members={members} currentMemberId={currentMember.memberId} creatorId={groupCreator?.userId}/>
+          ? <ExpensesListComponent 
+              expenses={expensesByGroup} 
+              refreshing={refreshing} 
+              onRefresh={onExpensesRefresh} 
+              screenOption='GroupDetailsScreen' 
+            />
+
+          : <MembersListComponent 
+              members={members} 
+              currentMemberId={currentMember.memberId} 
+              creatorId={groupCreator?.userId} 
+              refreshing={refreshing} 
+              onRefresh={onMembersRefresh} 
+            />
         }
       </View>
 
       {activeTab === 'expenses' && <AddExpensesComponentButton onPress={() => setModalVisible(true)} />}
-      {activeTab === 'members' && <InviteUserButtonComponent groupId={groupId} groupName={groupName as string}/>}
+      {activeTab === 'members' && <InviteUserButtonComponent groupId={groupId} groupName={groupName as string} />}
 
       <AddExpenseModalComponent
-          visible={modalVisible}
-          groupId={groupId}
-          memberId={currentMember.memberId}
-          onClose={() => setModalVisible(false)}
-        />
-      </View>
+        visible={modalVisible}
+        groupId={groupId}
+        memberId={currentMember.memberId}
+        onClose={() => setModalVisible(false)}
+      />
+    </View>
 
   );
 }
