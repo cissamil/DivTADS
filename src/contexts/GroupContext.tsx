@@ -21,6 +21,7 @@ interface GroupContextData {
     deleteGroup: (groupId: string) => Promise<void>;
     editGroup: (groupId: string, newData: Partial<GroupComposition>) => Promise<void>;
     selectGroup: (group: GroupComposition) => void;
+    leaveGroup: (memberId: string) => Promise<void>;
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -96,13 +97,31 @@ export function GroupProvider({ children }: GroupProviderProps) {
 
     //3. deletar grupo
     const deleteGroup = async (groupId: string) => {
+        setIsLoading(true);
         try{
             await groupService.deleteGroup(groupId);
             setGroups((prevGroups) => prevGroups.filter((g) => g.id !== groupId));
-        }catch(err){
-
+        }catch(err : any){
+            setError(err);
             return;
+        }finally{
+            setIsLoading(false);
         }
+
+    };
+
+    const leaveGroup = async (memberId: string) => {
+        setIsLoading(true);
+        try{
+            await groupService.leaveGroup(memberId);
+            setGroups((prevGroups) => prevGroups.filter((g) => g.id !== memberId));
+        }catch(err : any){
+            setError(err);
+            return;
+        }finally{
+            setIsLoading(false);
+        }
+
     };
 
     //4.editar grupo
@@ -142,7 +161,8 @@ export function GroupProvider({ children }: GroupProviderProps) {
         createGroup,
         deleteGroup,
         editGroup,
-        selectGroup
+        selectGroup,
+        leaveGroup
     };
 
     return (

@@ -7,9 +7,11 @@ import { GroupHeaderComponentStyle } from "./styles/GroupDetailsScreenStyle";
 
 interface GroupHeaderProps {
     groupName: string;
+    onLeave?: () => void;
+    isGroupCreator: boolean;
 }
 
-export default function GroupHeaderComponent({ groupName }: GroupHeaderProps) {
+export default function GroupHeaderComponent({ groupName, onLeave, isGroupCreator }: GroupHeaderProps) {
     const insets = useSafeAreaInsets();
 
     return (
@@ -19,7 +21,13 @@ export default function GroupHeaderComponent({ groupName }: GroupHeaderProps) {
             </TouchableOpacity>
             <Text style={GroupHeaderComponentStyle.headerTitle}>{groupName}</Text>
             <View style={{ width: 60 }} />
-            {/* Espaçador para centralizar o título */}
+            {onLeave ? (
+                <TouchableOpacity onPress={onLeave} style={{ width: 60, alignItems: 'flex-end' }}>
+                    <Text style={{ color: '#ef4444', fontWeight: 'bold' }}>{isGroupCreator ? 'Deletar' : 'Sair'}</Text>
+                </TouchableOpacity>
+            ) : (
+                <View style={{ width: 60 }} />
+            )}
         </View>
     );
 }

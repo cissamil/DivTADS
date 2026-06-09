@@ -55,14 +55,14 @@ export default function JoinGroupScreen() {
       // Código '23505' no Postgres significa que o registro já existe (já é membro)
       if (error.code === '23505') {
         Alert.alert('Aviso', 'Você já faz parte deste grupo!');
-        router.replace({ pathname: '/group/[id]', params: { id: groupId, groupName: groupName ?? '' } });
+        router.replace({ pathname: '/(auth)/(tabs)/home'});
       } else {
         Alert.alert('Erro ao entrar', error.message);
       }
     } else {
       Alert.alert('Sucesso', `Bem-vindo ao grupo ${groupName}!`);
       // Navega direto para a tela de detalhes do grupo após aceitar
-      router.replace({ pathname: '/group/[id]', params: { id: groupId, groupName: groupName ?? '' } });
+      router.replace({ pathname: '/(auth)/(tabs)/home'});
     }
   };
 

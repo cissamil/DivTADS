@@ -56,11 +56,28 @@ export class GroupService {
       const { error: supabaseError } = await supabase
         .from("groups")
         .delete()
-        .eq("id", groupId);
+        .eq("group_id", groupId);
 
       if (supabaseError) throw supabaseError;
     } catch (err: any) {
-      Alert.alert("Erro ao deletar", "Não foi possível remover o grupo.");
+      
+      console.error("Erro ao deletar grupo: ", err);
+      throw Error("Erro ao deletar grupo: " + err);
+    }
+  }
+  
+  public async leaveGroup(memberId: string): Promise<void> {
+    try {
+        const { error } = await supabase
+          .from('members')
+          .delete()
+          .eq('member_id', memberId);
+
+      if (error) throw error;
+    } catch (err: any) {
+      
+      console.Console
+
       throw Error("Erro ao deletar grupo: " + err);
     }
   }

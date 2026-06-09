@@ -12,34 +12,28 @@ import MenuSelectorComponent from '@/src/features/groups/components/MenuSelector
 import { GroupDetailsScreenStyle } from '@/src/features/groups/components/styles/GroupDetailsScreenStyle';
 import { MemberComposition } from '@/src/features/home/models/MemberComposition';
 import { MembersService } from '@/src/features/services/MembersService';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const membersService: MembersService = new MembersService();
 
 export default function GroupDetailsScreen() {
-
+  
+  const { userData } = useAuth();
   const insets = useSafeAreaInsets();
   const { id, groupName } = useLocalSearchParams();
-  const groupId: string = id as string;
-
-  const [activeTab, setActiveTab] = useState<'expenses' | 'members'>('expenses');
-
-  const { userData } = useAuth();
-
-  //despesas
+  const { selectedGroup, leaveGroup, deleteGroup, error } = useGroup();
   const { expensesByGroup, fetchExpensesByGroup } = useExpense();
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const { selectedGroup } = useGroup();
-
-  const [members, setMembers] = useState<MemberComposition[]>([]);
+  
   const [isLoading, setIsLoading] = useState(true);
-
-  //pull to refresh
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [members, setMembers] = useState<MemberComposition[]>([]);
+  const [activeTab, setActiveTab] = useState<'expenses' | 'members'>('expenses');
+  
+  const groupId: string = id as string;
 
   const onExpensesRefresh = async () => {
     setRefreshing(true);
@@ -81,6 +75,45 @@ export default function GroupDetailsScreen() {
 
   const currentMember = members.find((member) => member.userId == userData?.userId);
   const groupCreator = members.find((members) => members.userId == selectedGroup?.creatorId)
+  const isGroupCreator = currentMember?.memberId === groupCreator?.memberId;
+
+  const handleLeaveOrDeleteGroup = () => {
+
+    const title = isGroupCreator ? "Deletar Grupo" : "Saido do Grupo";
+    const description = isGroupCreator 
+      ? `Tem certeza que deseja deletar o grupo '${groupName}'? Essa ação não pode desfeita e você perderá todo o histórico do grupo`
+      : `Tem certeza que deseja sair do grupo '${groupName}'?`;
+      
+    const option = isGroupCreator ? 'Deletar' : 'Sair';
+    const optionError = isGroupCreator ? 'deletar' : 'sair do';
+    const optionSuccess = isGroupCreator ? 'deletou' : 'saiu do';
+
+    Alert.alert(title, description, [
+      {text: 'Cancelar', style:'cancel'},
+      {
+        text: option,
+        style: 'destructive',
+
+        onPress: async () =>{
+          if(!currentMember?.memberId) return;
+          if(!groupCreator?.memberId) return;
+          
+          isGroupCreator ? await deleteGroup(groupId) : await leaveGroup(currentMember.memberId);
+
+          if(error) {
+            Alert.alert(`Erro ao ${optionError} grupo`, error);
+            return;
+          }
+
+          Alert.alert("Sucesso", `Você ${optionSuccess} grupo.`)
+
+          router.replace('/home');
+        }
+      }
+    ])
+
+  }
+
 
   if (isLoading) {
     return (
@@ -102,7 +135,7 @@ export default function GroupDetailsScreen() {
   return (
     <View style={[GroupDetailsScreenStyle.container, { paddingBottom: insets.bottom + 10, paddingTop: 10 }]}>
 
-      <GroupHeaderComponent groupName={groupName as string} />
+      <GroupHeaderComponent groupName={groupName as string} onLeave={handleLeaveOrDeleteGroup} isGroupCreator={isGroupCreator} />
 
       <GroupSummaryComponent total_balance={selectedGroup.totalBalance} currentUserTotalSpent={currentMember.total_spent} />
 
