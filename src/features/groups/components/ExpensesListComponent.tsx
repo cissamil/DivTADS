@@ -1,15 +1,16 @@
 import { Text } from 'react-native';
-
 import { NumberFormatter } from '@/src/utils/NumberFormatter';
-import { FlatList, View } from "react-native";
+import { FlatList, View , RefreshControl } from "react-native";
 import { ExpenseComposition } from "../models/ExpenseComposition";
 import { ExpensesListComponentStyle } from "./styles/GroupDetailsScreenStyle";
 
 interface ExpanseListProps {
     expenses: ExpenseComposition[];
+    refreshing: boolean;
+    onRefresh: () => void;
 }
 
-export default function ExpensesListComponent({ expenses }: ExpanseListProps) {
+export default function ExpensesListComponent({ expenses, refreshing, onRefresh }: ExpanseListProps) {
 
     const formatedValue = (value:number) =>{
         return NumberFormatter.formatToMoney(value);
@@ -19,6 +20,12 @@ export default function ExpensesListComponent({ expenses }: ExpanseListProps) {
         <FlatList
             data={expenses}
             keyExtractor={(item) => item.expenseId}
+            refreshControl={
+                <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+               />
+            }
             renderItem={({ item }) => (
                 <View style={ExpensesListComponentStyle.cardItem}>
                     <View>

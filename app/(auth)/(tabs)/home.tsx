@@ -6,7 +6,7 @@ import { GroupComposition } from '@/src/features/home/models/GroupComposition';
 import { NumberFormatter } from '@/src/utils/NumberFormatter';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
 
@@ -18,7 +18,14 @@ export default function Home() {
   const { userData } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const { fetchGroups, selectGroup, groupsList: groups, createGroup } = useGroup();
-  const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0)
+  const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0);
+  const [refreshing,setRefreshing] = useState(false);
+
+  const onRefresh= async () => {
+    setRefreshing(true);
+    await fetchGroups(userData!.userId);
+    setRefreshing(false);
+  };
 
   
   useFocusEffect(
@@ -62,6 +69,12 @@ export default function Home() {
           style={HomeScreenStyles.content}
           data={groups}
           keyExtractor={item => String(item.id)}
+          refreshControl={
+              <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+              />
+          }
           ListHeaderComponent={
             <>
               <View style={HomeScreenStyles.balanceCard}>

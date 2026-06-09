@@ -37,6 +37,15 @@ export default function GroupDetailsScreen() {
   const [members, setMembers] = useState<MemberComposition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  //pull to refresh
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchExpenses(groupId);
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     const fetchNewExpenses = async () => {await fetchExpenses(groupId)};
 
@@ -98,7 +107,7 @@ export default function GroupDetailsScreen() {
       <View style={GroupDetailsScreenStyle.contentContainer}>
         {activeTab === 'expenses'
 
-          ? <ExpensesListComponent expenses={expenses} />
+          ? <ExpensesListComponent expenses={expenses} refreshing={refreshing} onRefresh={onRefresh} />
           : <MembersListComponent members={members} currentMemberId={currentMember.memberId} creatorId={groupCreator?.userId}/>
         }
       </View>
