@@ -8,10 +8,12 @@ import { ExpenseService } from '../features/services/ExpenseService';
 const expenseService: ExpenseService = new ExpenseService();
 
 interface ExpenseContextData {
-    expenses: ExpenseComposition[];
+    expensesByGroup: ExpenseComposition[];
+    allExpenses: ExpenseComposition[];
     isLoading: boolean;
     error: string | null;
-    fetchExpenses: (groupId: string) => Promise<void>;
+    fetchExpensesByGroup: (groupId: string) => Promise<void>;
+    fetchAllExpensesByUserId: (userId:string) => Promise<void>;
     createExpense: (
         groupId: string,
         totalAmount: number,
@@ -35,24 +37,43 @@ interface ExpenseProviderProps {
 
 //Provider
 export function ExpenseProvider({ children }: ExpenseProviderProps) {
-    const [expenses, setExpenses] = useState<ExpenseComposition[]>([]);
+    const [expensesByGroup, setExpensesByGroup] = useState<ExpenseComposition[]>([]);
+    const [allExpenses, setAllExpenses] = useState<ExpenseComposition[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    // 1. buscar despesas do Supabase
-    const fetchExpenses = async (groupId: string) => {
+    const fetchAllExpensesByUserId = async (userId:string) =>{
         setIsLoading(true);
         setError(null);
         try {
+            
+            const expenses = await expenseService.getAllExpenseMemberInformationsByUserId(userId);
 
-            const groupExpenses = await expenseService.getExpenseMemberInformationsByUserId(groupId);
-
-            if (groupExpenses) setExpenses(groupExpenses);
+            if (expenses) setAllExpenses(expenses);
 
         } catch (err: any) {
             console.error('Erro ao buscar despesas:', err.message);
             setError('Nenhuma despesa cadastrada. Crie uma nova para começar!');
-            setExpenses([]);
+            setExpensesByGroup([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    // 1. buscar despesas do Supabase
+    const fetchExpensesByGroup = async (groupId: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+
+            const groupExpenses = await expenseService.getExpenseMemberInformationsByGroupId(groupId);
+
+            if (groupExpenses) setExpensesByGroup(groupExpenses);
+
+        } catch (err: any) {
+            console.error('Erro ao buscar despesas:', err.message);
+            setError('Nenhuma despesa cadastrada. Crie uma nova para começar!');
+            setExpensesByGroup([]);
         } finally {
             setIsLoading(false);
         }
@@ -68,7 +89,7 @@ export function ExpenseProvider({ children }: ExpenseProviderProps) {
         try {
             await expenseService.createNewExpense(expense);
 
-            await fetchExpenses(groupId);
+            await fetchExpensesByGroup(groupId);
         } catch (err: any) {
             console.error("Erro ao cadastrar a despesa: ", err);
             Alert.alert('Erro ao salvar', 'Não foi possível criar a despesa no servidor :(');
@@ -89,10 +110,12 @@ export function ExpenseProvider({ children }: ExpenseProviderProps) {
     //4.add editar despesas
 
     const contextValue: ExpenseContextData = {
-        expenses,
+        expensesByGroup,
+        allExpenses,
         isLoading,
         error,
-        fetchExpenses,
+        fetchAllExpensesByUserId: fetchAllExpensesByUserId,
+        fetchExpensesByGroup,
         createExpense,
         deleteExpense,
     };

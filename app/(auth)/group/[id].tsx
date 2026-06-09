@@ -15,21 +15,22 @@ import { MembersService } from '@/src/features/services/MembersService';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const membersService: MembersService = new MembersService();
 
 export default function GroupDetailsScreen() {
 
+  const insets = useSafeAreaInsets();
   const { id, groupName } = useLocalSearchParams();
   const groupId: string = id as string;
 
-  // Estado local para gerenciar o menu seletor (Toggle interno)
   const [activeTab, setActiveTab] = useState<'expenses' | 'members'>('expenses');
 
   const  {userData} = useAuth();
 
   //despesas
-  const {expenses, fetchExpenses} = useExpense();
+  const {expensesByGroup, fetchExpensesByGroup} = useExpense();
   const [modalVisible, setModalVisible] = useState(false);
 
   const {selectedGroup} = useGroup();
@@ -38,7 +39,7 @@ export default function GroupDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNewExpenses = async () => {await fetchExpenses(groupId)};
+    const fetchNewExpenses = async () => {await fetchExpensesByGroup(groupId)};
 
     const fetchMembersInformation = async (groupId: string) =>{
       setIsLoading(true);
@@ -60,7 +61,6 @@ export default function GroupDetailsScreen() {
   const currentMember = members.find((member) => member.userId == userData?.userId);
   const groupCreator = members.find((members) => members.userId == selectedGroup?.creatorId)
 
-  // 3. Tratamento de Loading visualmente agradável antes do tratamento de Erro
   if (isLoading) {
     return (
       <View style={[GroupDetailsScreenStyle.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -69,7 +69,6 @@ export default function GroupDetailsScreen() {
     );
   }
 
-  // Se terminou de carregar e mesmo assim faltou dado, aí sim mostramos erro
   if (!selectedGroup || !currentMember || !groupCreator) {
     return (
       <View style={[GroupDetailsScreenStyle.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -80,25 +79,22 @@ export default function GroupDetailsScreen() {
 
 
   return (
-    <View style={GroupDetailsScreenStyle.container}>
-      {/* Top Header Customizado com botão de voltar */}
+    <View style={[GroupDetailsScreenStyle.container, {paddingBottom: insets.bottom + 10, paddingTop: 10}]}>
+
       <GroupHeaderComponent groupName={groupName as string} />
 
-      {/* Card de Contexto Financeiro do Grupo */}
       <GroupSummaryComponent total_balance={selectedGroup.totalBalance} currentUserTotalSpent={currentMember.total_spent} />
 
-      {/* Menu Seletor Interno (Toggle Despesas vs Membros) */}
       <MenuSelectorComponent 
         activeTab={activeTab} 
         selectExpenses={() => setActiveTab('expenses')} 
         selectMembers={() => setActiveTab('members')}
       />
 
-      {/* Área de Exibição Condicional de Listas */}
       <View style={GroupDetailsScreenStyle.contentContainer}>
         {activeTab === 'expenses'
 
-          ? <ExpensesListComponent expenses={expenses} />
+          ? <ExpensesListComponent expenses={expensesByGroup} screenOption='GroupDetailsScreen' />
           : <MembersListComponent members={members} currentMemberId={currentMember.memberId} creatorId={groupCreator?.userId}/>
         }
       </View>

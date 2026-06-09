@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useExpense } from '@/src/contexts/ExpenseContext';
+import { useState } from 'react';
+import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { StorageService } from '../../services/StorageService';
-import { StyleSheet } from 'react-native';
-import { Image } from 'react-native';
 
 interface Props {
   visible: boolean;
@@ -15,7 +13,7 @@ interface Props {
 const storageService: StorageService = new StorageService();
 
 export default function AddExpenseModalComponent({ visible, groupId, memberId, onClose }: Props) {
-  const { createExpense, fetchExpenses } = useExpense();
+  const { createExpense, fetchExpensesByGroup: fetchExpenses } = useExpense();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [amountValue, setAmountValue] = useState(0);

@@ -3,9 +3,34 @@ import { ExpenseComposition } from "../groups/models/ExpenseComposition";
 import { ExpenseDomain } from "../groups/models/ExpenseDomain";
 
 export class ExpenseService {
-  public async getExpenseMemberInformationsByUserId(
-    groupId: string,
-  ): Promise<ExpenseComposition[] | null> {
+
+  public async getAllExpenseMemberInformationsByUserId(userId:string): Promise<ExpenseComposition[] | null> {
+    const { data, error } = await supabase
+      .from("v_expense_member_information")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Erro ao buscar grupos: ", error.message);
+      throw new Error("Erro ao buscar grupos: ", error);
+    }
+
+    return data.map((expense) => ({
+      expenseId: expense.expense_id,
+      description: expense.description,
+      groupId: expense.group_id,
+      memberId: expense.member_id,
+      memberName: expense.member_name,
+      createdAt: new Date(expense.created_at),
+      totalAmount: expense.total_amount,
+      category: expense.category,
+      receiptUrl: expense.receipt_url,
+      groupName: expense.group_name,
+      userId: expense.user_id
+    }));
+  }
+  
+  public async getExpenseMemberInformationsByGroupId(groupId: string): Promise<ExpenseComposition[] | null> {
     const { data, error } = await supabase
       .from("v_expense_member_information")
       .select("*")
@@ -25,6 +50,9 @@ export class ExpenseService {
       createdAt: new Date(expense.created_at),
       totalAmount: expense.total_amount,
       category: expense.category,
+      receiptUrl: expense.receipt_url,
+      groupName: expense.group_name,
+      userId: expense.user_id
     }));
   }
 

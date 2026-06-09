@@ -58,7 +58,7 @@ export const ExpensesListComponentStyle = StyleSheet.create({
     fontWeight: '600',
   },
   itemSubtitle: {
-    color: '#666',
+    color: '#acacac',
     fontSize: 12,
     marginTop: 2,
   },
