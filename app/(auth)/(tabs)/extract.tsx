@@ -4,7 +4,7 @@ import ExpensesListComponent from '@/src/features/groups/components/ExpensesList
 import { GroupDetailsScreenStyle } from '@/src/features/groups/components/styles/GroupDetailsScreenStyle';
 import { HomeScreenStyles } from '@/src/features/home/components/styles/homeScreenStyles';
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,6 +13,17 @@ export default function Extract() {
   const { isLoading, allExpenses, fetchAllExpensesByUserId: fetchAllExpenses } = useExpense();
   const {userData} = useAuth();
 
+  //pull to refresh
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+
+    if(!userData) return;
+
+    setRefreshing(true);
+    await fetchAllExpenses(userData.userId);
+    setRefreshing(false);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -45,7 +56,7 @@ export default function Extract() {
 
         <View style={GroupDetailsScreenStyle.contentContainer}>
 
-          <ExpensesListComponent expenses={allExpenses} screenOption='ExtractScreen' />
+          <ExpensesListComponent expenses={allExpenses} refreshing={refreshing} onRefresh={onRefresh} screenOption='ExtractScreen' />
         </View>
       </View>
     </SafeAreaView>

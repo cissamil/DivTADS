@@ -1,18 +1,21 @@
-import { Image, Modal, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { NumberFormatter } from '@/src/utils/NumberFormatter';
-import { FlatList, View } from "react-native";
+import { FlatList, View, RefreshControl } from "react-native";
 import { ExpenseComposition } from "../models/ExpenseComposition";
 import { ExpensesListComponentStyle } from "./styles/GroupDetailsScreenStyle";
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'react-native';
 
 interface ExpanseListProps {
     expenses: ExpenseComposition[];
     screenOption: 'ExtractScreen' | 'GroupDetailsScreen'
+    refreshing: boolean;
+    onRefresh: () => void;
 }
 
-export default function ExpensesListComponent({ expenses, screenOption }: ExpanseListProps) {
+export default function ExpensesListComponent({ expenses, screenOption, refreshing, onRefresh }: ExpanseListProps) {
 
     const insets = useSafeAreaInsets();
 
@@ -47,6 +50,12 @@ export default function ExpensesListComponent({ expenses, screenOption }: Expans
                     paddingBottom: insets.bottom + 30,
                     paddingTop: 10
                 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
                 renderItem={({ item }) => (
                     <View style={ExpensesListComponentStyle.cardItem}>
                         <View>
