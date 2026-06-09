@@ -8,7 +8,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
+import { HomeScreenFabStyles, HomeScreenStyles } from '../../../src/features/home/components/styles/homeScreenStyles';
 
 
 export default function Home() {
@@ -19,20 +19,20 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const { fetchGroups, selectGroup, groupsList: groups, createGroup } = useGroup();
   const generalBalance = groups.reduce((total, group) => total + group.totalBalance, 0);
-  const [refreshing,setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh= async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     await fetchGroups(userData!.userId);
     setRefreshing(false);
   };
 
-  
+
   useFocusEffect(
     useCallback(() => {
-      
+
       if (!userData?.userId) return;
-      
+
       fetchGroups(userData.userId);
     }, [userData?.userId])
   )
@@ -70,10 +70,10 @@ export default function Home() {
           data={groups}
           keyExtractor={item => String(item.id)}
           refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-              />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
           }
           ListHeaderComponent={
             <>
@@ -102,13 +102,24 @@ export default function Home() {
 
         {/* FAB */}
         <TouchableOpacity
-          style={[fabStyles.fab, { bottom: 72 + insets.bottom }]}
+          style={[HomeScreenFabStyles.fab, { bottom: 72 + insets.bottom }]}
           onPress={() => setModalVisible(true)}
           activeOpacity={0.8}
         >
-          <Text style={fabStyles.fabIcon}>+</Text>
+          <Text style={HomeScreenFabStyles.fabIcon}>+</Text>
         </TouchableOpacity>
-        <Text style={[fabStyles.fabLabel, { bottom: 52 + insets.bottom }]}>Criar Grupo</Text>
+
+        {
+          groups.length > 0 ? (
+
+            <Text style={[HomeScreenFabStyles.fabLabel, { bottom: 52 + insets.bottom }]}>Novo Grupo</Text>
+          )
+          : (
+            
+            <Text style={[HomeScreenFabStyles.fabLabel, { bottom: 52 + insets.bottom }]}>Crie seu primeiro grupo</Text>
+            
+          )
+        }
 
         {/* Modal Criar Grupo */}
         <CreateGroupModalComponent
@@ -122,51 +133,3 @@ export default function Home() {
 }
 
 
-const fabStyles = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    alignSelf: 'center',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#6366f1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-  },
-  fabIcon: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '300',
-    lineHeight: 36,
-  },
-  fabLabel: {
-    position: 'absolute',
-    alignSelf: 'center',
-    color: '#fff',
-    fontSize: 13,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#1a1a1a',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 24,
-    minHeight: 300,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-  },
-  closeButton: {
-    color: '#6366f1',
-    fontSize: 16,
-    marginTop: 16,
-  },
-});
